@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>関数問題プリント生成</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Old+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FDFDFB;
+    --ink: #1A1A1A;
+    --sub-ink: #6B6B66;
+    --rule: #B8B6AC;
+    --accent: #7A1F1F;
+    --choice-bg: #F3F2ED;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Zen Old Mincho", "Hiragino Mincho ProN", serif;
+    line-height: 1.9;
+    min-height: 100vh;
+    font-size: 15.5px;
+  }
+  .wrap{ max-width: 900px; margin: 0 auto; padding: 36px 20px 90px; }
+
+  header.site-head{ margin-bottom: 26px; border-bottom: 2px solid var(--ink); padding-bottom: 18px; }
+  header.site-head .kicker{ font-size: 12px; letter-spacing: .28em; color: var(--sub-ink); margin: 0 0 8px; }
+  header.site-head h1{
+    font-family: "Shippori Mincho", serif; font-weight: 700;
+    font-size: clamp(24px, 4vw, 32px); margin: 0 0 10px; letter-spacing: .04em;
+  }
+  header.site-head p{ max-width: 64ch; color: var(--sub-ink); font-size: 14px; margin: 0; }
+
+  .picker{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-bottom: 22px; border: 1px solid var(--ink); }
+  @media (max-width: 640px){ .picker{ grid-template-columns: 1fr; } }
+  .pattern-card{
+    background: var(--paper); border: none; border-right: 1px solid var(--ink);
+    padding: 16px 18px; cursor: pointer; text-align: left; font-family: inherit;
+  }
+  .pattern-card:last-child{ border-right: none; }
+  @media (max-width: 640px){ .pattern-card{ border-right:none; border-bottom: 1px solid var(--ink);} .pattern-card:last-child{border-bottom:none;} }
+  .pattern-card.active{ background: var(--ink); color: var(--paper); }
+  .pattern-card.active p{ color: #CFCDC4; }
+  .pattern-card .tag{ font-size: 11px; letter-spacing: .1em; color: var(--sub-ink); display: block; margin-bottom: 6px; }
+  .pattern-card.active .tag{ color: #B9B7AC; }
+  .pattern-card h3{ font-family: "Shippori Mincho", serif; font-size: 17px; margin: 0 0 6px; }
+  .pattern-card p{ font-size: 12.5px; color: var(--sub-ink); margin: 0; }
+
+  .config-panel{
+    display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: flex-end;
+    margin-bottom: 22px; padding: 18px 20px; border: 1px solid var(--ink);
+  }
+  .config-field{ display:flex; flex-direction: column; gap: 6px; }
+  .config-field label{ font-size: 13px; color: var(--sub-ink); }
+  .config-field select{
+    font-family: "Zen Old Mincho", serif; font-size: 15px; padding: 7px 10px;
+    border: 1px solid var(--ink); background: #fff; color: var(--ink); min-width: 90px;
+  }
+  .config-field.checkbox-field{ flex-direction: row; align-items: center; }
+  .config-field.checkbox-field label{ font-size: 14px; color: var(--ink); display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .config-field.checkbox-field input{ width:16px; height:16px; cursor:pointer; }
+
+  .print-buttons{ display:flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+  button.primary, button.secondary{
+    border: 1px solid var(--ink); padding: 12px 26px; font-size: 14.5px;
+    font-family: "Shippori Mincho", serif; cursor: pointer; letter-spacing: .04em;
+  }
+  button.primary{ background: var(--ink); color: #fff; }
+  button.primary:hover{ background: var(--accent); border-color: var(--accent); }
+  button.secondary{ background: #fff; color: var(--ink); }
+  button.secondary:hover{ background: var(--choice-bg); }
+
+  #printArea{ background:#fff; }
+  #printArea:empty::before{
+    content: "単元を選んで「プリントを作成」を押してください。";
+    color: var(--sub-ink); font-size: 14px;
+  }
+  .print-page-head{ text-align:center; margin-bottom: 14px; border-bottom: 1px solid var(--ink); padding-bottom: 8px; }
+  .print-page-head h3{ font-family:"Shippori Mincho", serif; font-size: 22px; margin:0 0 6px; }
+  .print-page-head .meta{ font-size:12px; color: var(--sub-ink); }
+  .print-name-line{ margin-top:10px; font-size:13px; }
+  .print-name-line .blank{ display:inline-block; width: 160px; border-bottom: 1px solid var(--ink); margin-left:8px; }
+
+  .print-problem{ margin-bottom: 16px; border: 1px solid var(--ink); padding: 14px clamp(14px,3vw,24px); }
+  .print-problem .setup-line{ display:flex; gap: 24px; align-items:flex-start; flex-wrap: wrap; margin: 10px 0 14px; }
+  .print-problem .setup-line p{ flex:1 1 280px; font-size: 14.5px; margin:0; }
+  .print-problem .setup-line .figbox{ flex: 0 0 195px; text-align:center; }
+  .print-sub{ margin: 8px 0; font-size: 13.5px; }
+  .print-sub .qlab{ font-family:"Shippori Mincho", serif; font-weight:700; margin-right:4px; }
+  .print-sub .process-note{ font-size:12.5px; color: var(--accent); margin-left:4px; }
+  .answer-line{ margin-top: 10px; font-size: 13.5px; }
+  .answer-line .blank{ display:inline-block; min-width: 140px; border-bottom: 1px solid var(--ink); margin-left:6px; }
+  .work-space{ height: 42px; border-bottom: 1px dashed var(--rule); margin-top: 6px; }
+
+  .answer-page{ margin-top: 10px; }
+  .answer-page h3{ font-family:"Shippori Mincho", serif; font-size:19px; border-bottom:1px solid var(--ink); padding-bottom:8px; }
+  .answer-item{ font-size: 13px; margin-bottom:8px; }
+  .answer-item .ans-final{ font-weight:700; margin-bottom:4px; }
+  .answer-item .ans-steps{ color: var(--sub-ink); font-size:12.5px; white-space:pre-line; margin-left: 2px; }
+
+  footer.note{ margin-top: 28px; font-size: 12px; color: var(--sub-ink); border-top: 1px solid var(--rule); padding-top: 14px; }
+
+  @media print{
+    body{ background:#fff; line-height: 1.55; font-size: 13.5px; }
+    .no-print{ display:none !important; }
+    .wrap{ max-width: none; padding: 0; }
+    .print-problem{ page-break-inside: avoid; border: none; padding: 0; }
+      }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site-head no-print">
+    <p class="kicker">高校入試 ・ 関数 ・ ランダム構成ジェネレーター</p>
+    <h1>関数問題プリント生成</h1>
+    <p>関数の種類と数を指定して「プリントを作成」を押すと、その組み合わせに応じた場面がランダムに作られ、聞かれる内容(変域・2点を通る直線・交点・三角形や四角形の面積・面積を2等分する直線・動点の座標)もその場面に応じて選ばれます。</p>
+  </header>
+
+  <div class="config-panel no-print" id="configPanel">
+    <div class="config-field">
+      <label for="numPara">二次関数(放物線)の数</label>
+      <select id="numPara">
+        <option value="0">0</option>
+        <option value="1" selected>1</option>
+        <option value="2">2</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label for="numLine">一次関数(傾きのある直線)の数</label>
+      <select id="numLine">
+        <option value="0" selected>0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label for="numAxisLine">軸に平行な直線の数</label>
+      <select id="numAxisLine">
+        <option value="0" selected>0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+    <div class="config-field checkbox-field">
+      <label><input type="checkbox" id="hasInverse"> 反比例を含む</label>
+    </div>
+    <div class="config-field">
+      <label for="numPoints">登場する点の数</label>
+      <select id="numPoints">
+        <option value="0" selected>指定しない</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="print-buttons no-print">
+    <button class="primary" id="buildPrintBtn">プリントを作成</button>
+    <button class="secondary" id="doPrintBtn">印刷する / PDF保存</button>
+  </div>
+
+  <footer class="note no-print">出題される可能性がある内容: 変域 / 2点を通る直線の式 / 交点 / 三角形・四角形の面積 / 三角形の面積を2等分する直線の式 / 面積や線分の長さの条件を満たす動点の座標。</footer>
+
+  <div id="printArea"></div>
+</div>
+
+<script>
+/* ============ ユーティリティ ============ */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;}
+function toFraction(x, maxDenom=12){
+  if (Math.abs(x - Math.round(x)) < 1e-9) return {num: Math.round(x), den: 1};
+  for (let den=2; den<=maxDenom; den++){
+    const num = x*den;
+    if (Math.abs(num - Math.round(num)) < 1e-6){ let n=Math.round(num), d=den; const g=gcd(n,d); return {num:n/g, den:d/g}; }
+  }
+  return null;
+}
+function isNice(x, maxDenom=4){ return toFraction(x, maxDenom) !== null; }
+function formatNum(x, maxDenom=12){
+  if (Object.is(x,-0)) x=0;
+  const f = toFraction(x, maxDenom);
+  if (!f) return (Math.round(x*1000)/1000).toString();
+  return `${f.num<0?'-':''}${Math.abs(f.num)}${f.den===1?'':'/'+f.den}`;
+}
+function fmtLinear(m,b){
+  if (m===0) return `y = ${formatNum(b)}`;
+  let mPart = m===1?'x':(m===-1?'-x':`${formatNum(m)}x`);
+  if (b===0) return `y = ${mPart}`;
+  return `y = ${mPart} ${b>0?'+':'-'} ${formatNum(Math.abs(b))}`;
+}
+function fmtPoint(x,y){ return `(${formatNum(x)}, ${formatNum(y)})`; }
+function shoelace(pts){
+  let s=0;
+  for (let i=0;i<pts.length;i++){ const [x1,y1]=pts[i]; const [x2,y2]=pts[(i+1)%pts.length]; s+=x1*y2-x2*y1; }
+  return Math.abs(s)/2;
+}
+function collinear(p1,p2,p3){
+  return Math.abs((p2[0]-p1[0])*(p3[1]-p1[1]) - (p3[0]-p1[0])*(p2[1]-p1[1])) < 1e-9;
+}
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* ============ SVG描画エンジン ============ */
+const SVG_NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs){
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function sampleCurve(curve, steps=120){
+  if (curve.type === 'parabola'){
+    const [lo,hi] = curve.xrange;
+    const pts = [];
+    for (let i=0;i<=steps;i++){ const x = lo+(hi-lo)*i/steps; pts.push([x, curve.a*x*x]); }
+    return [pts];
+  }
+  if (curve.type === 'line'){
+    const [lo,hi] = curve.xrange;
+    return [[[lo, curve.m*lo+curve.b], [hi, curve.m*hi+curve.b]]];
+  }
+  if (curve.type === 'inverse'){
+    const [lo,hi] = curve.xrange;
+    const seg = [];
+    for (let i=0;i<=steps;i++){ const x=lo+(hi-lo)*i/steps; if (Math.abs(x)>1e-6) seg.push([x, curve.k/x]); }
+    return [seg];
+  }
+  return [];
+}
+function renderScene(container, scene, size=260){
+  container.innerHTML = '';
+  const {curves=[], points=[], segments=[]} = scene;
+  const vlineXs = curves.filter(c=>c.type==='vline').map(c=>c.x);
+  let xmin = Math.min(0, ...points.map(p=>p.x), ...vlineXs);
+  let xmax = Math.max(0, ...points.map(p=>p.x), ...vlineXs);
+  let ymin = Math.min(0, ...points.map(p=>p.y));
+  let ymax = Math.max(0, ...points.map(p=>p.y));
+  const padX = Math.max((xmax-xmin)*0.12, 0.6);
+  const padY = Math.max((ymax-ymin)*0.12, 0.6);
+  xmin -= padX; xmax += padX; ymin -= padY; ymax += padY;
+  const w = xmax-xmin, h = ymax-ymin;
+  const scaleX = (size-32)/w, scaleY = (size-32)/h;
+  const cx = size/2 - (xmin+xmax)/2*scaleX;
+  const cy = size/2 + (ymin+ymax)/2*scaleY;
+  function toPx(x,y){ return [cx+x*scaleX, cy-y*scaleY]; }
+
+  const svg = el('svg', {class:'graph', width:size, height:size, viewBox:`0 0 ${size} ${size}`});
+  const [ax1,ay1] = toPx(xmin+padX*0.1,0), [ax2,ay2] = toPx(xmax-padX*0.1,0);
+  const [ay1x,ay1y] = toPx(0,ymin+padY*0.1), [ay2x,ay2y] = toPx(0,ymax-padY*0.1);
+  svg.appendChild(el('line',{x1:ax1,y1:ay1,x2:ax2,y2:ay2,stroke:'#1A1A1A','stroke-width':1}));
+  svg.appendChild(el('line',{x1:ay1x,y1:ay1y,x2:ay2x,y2:ay2y,stroke:'#1A1A1A','stroke-width':1}));
+  const lx = el('text',{x:ax2-2,y:ay2-6,'font-size':11,fill:'#1A1A1A','text-anchor':'end','font-style':'italic'}); lx.textContent='x'; svg.appendChild(lx);
+  const ly = el('text',{x:ay2x+6,y:ay2y+10,'font-size':11,fill:'#1A1A1A','font-style':'italic'}); ly.textContent='y'; svg.appendChild(ly);
+
+  const [ox,oy] = toPx(0,0);
+  const originLabel = el('text',{x:ox-11,y:oy+13,'font-size':10.5,fill:'#1A1A1A','font-style':'italic'});
+  originLabel.textContent = 'O';
+  if (!points.some(p=>p.label==='O')) svg.appendChild(originLabel);
+
+  for (const c of curves){
+    if (c.type==='vline'){
+      const [px1,py1] = toPx(c.x, ymin+padY*0.1);
+      const [px2,py2] = toPx(c.x, ymax-padY*0.1);
+      svg.appendChild(el('line',{x1:px1,y1:py1,x2:px2,y2:py2, stroke:'#1A1A1A','stroke-width':1.4}));
+      continue;
+    }
+    const plotX0 = xmin+padX*0.05, plotX1 = xmax-padX*0.05;
+    const plotY0 = ymin+padY*0.05, plotY1 = ymax-padY*0.05;
+    let drawCurve = c;
+    if (c.type==='parabola'){
+      const {a} = c;
+      let xRight = plotX1, xLeft = plotX0;
+      if (a>0 && plotY1>0){
+        const lim = Math.sqrt(plotY1/a);
+        xRight = Math.min(plotX1, lim);
+        xLeft = Math.max(plotX0, -lim);
+      } else if (a<0 && plotY0<0){
+        const lim = Math.sqrt(plotY0/a);
+        xRight = Math.min(plotX1, lim);
+        xLeft = Math.max(plotX0, -lim);
+      }
+      drawCurve = {...c, xrange:[xLeft, xRight]};
+    } else if (c.type==='line'){
+      if (Math.abs(c.m)<1e-9){
+        drawCurve = {...c, xrange:[plotX0, plotX1]};
+      } else {
+        const xAtY0 = (plotY0-c.b)/c.m, xAtY1 = (plotY1-c.b)/c.m;
+        const yxLo = Math.min(xAtY0,xAtY1), yxHi = Math.max(xAtY0,xAtY1);
+        const xLeft = Math.max(plotX0, yxLo), xRight = Math.min(plotX1, yxHi);
+        drawCurve = {...c, xrange:[Math.min(xLeft,xRight), Math.max(xLeft,xRight)]};
+      }
+    } else if (c.type==='inverse'){
+      const sign = c.k>0 ? 1 : -1;
+      const edge = sign>0 ? plotX1 : plotX0;
+      let nearZero;
+      if (sign>0){
+        const yLimit = plotY1>0 ? c.k/plotY1 : 0.3;
+        nearZero = Math.max(0.3, yLimit);
+      } else {
+        const yLimit = plotY0<0 ? c.k/plotY0 : -0.3;
+        nearZero = Math.min(-0.3, yLimit);
+      }
+      drawCurve = {...c, xrange:[Math.min(nearZero,edge), Math.max(nearZero,edge)]};
+    }
+    for (const seg of sampleCurve(drawCurve)){
+      const d = seg.map(([x,y],i)=>{ const [px,py]=toPx(x,y); return `${i===0?'M':'L'}${px.toFixed(1)},${py.toFixed(1)}`; }).join(' ');
+      svg.appendChild(el('path',{d, fill:'none', stroke:'#1A1A1A','stroke-width':1.4}));
+    }
+  }
+  for (const [i,j,style] of segments){
+    const [x1,y1] = toPx(points[i].x, points[i].y);
+    const [x2,y2] = toPx(points[j].x, points[j].y);
+    svg.appendChild(el('line',{x1,y1,x2,y2, stroke:'#1A1A1A', 'stroke-width': style==='dashed'?0.9:1.1, 'stroke-dasharray': style==='dashed'?'3 3':'none'}));
+  }
+
+  // 点とラベル(近接時は重ならない位置を自動選択)
+  const placedBoxes = [];
+  const CAND = [[7,-7],[7,15],[-15,-7],[-15,15],[7,4],[-15,4],[-3,-11],[-3,17]];
+  function posToCandOrder(pos){
+    if (pos==='below') return [1,7,3,5,0,2,4,6];
+    if (pos==='left') return [2,4,3,5,0,1,6,7];
+    if (pos==='above') return [0,4,1,5,2,3,6,7];
+    return [0,4,1,5,2,3,6,7];
+  }
+  function boxOverlaps(bx){
+    for (const b of placedBoxes){
+      if (bx.x0<b.x1 && bx.x1>b.x0 && bx.y0<b.y1 && bx.y1>b.y0) return true;
+    }
+    return false;
+  }
+  for (const p of points){
+    if (!p.label) continue;
+    const [px,py] = toPx(p.x,p.y);
+    svg.appendChild(el('circle',{cx:px,cy:py,r:2.4,fill:'#1A1A1A'}));
+    placedBoxes.push({x0:px-3,x1:px+3,y0:py-3,y1:py+3});
+    const order = posToCandOrder(p.pos);
+    const labelW = 7*(p.label.length)+4, labelH = 11;
+    let chosen = CAND[order[0]];
+    for (const idx of order){
+      const [dx,dy] = CAND[idx];
+      const bx = {x0:px+dx-2, x1:px+dx+labelW-2, y0:py+dy-labelH+2, y1:py+dy+3};
+      if (!boxOverlaps(bx)){ chosen = CAND[idx]; placedBoxes.push(bx); break; }
+      if (idx===order[order.length-1]) placedBoxes.push(bx);
+    }
+    const [dx,dy] = chosen;
+    const t = el('text',{x:px+dx,y:py+dy,'font-size':12,fill:'#1A1A1A','font-style':'italic'});
+    t.textContent = p.label;
+    svg.appendChild(t);
+  }
+  container.appendChild(svg);
+}
+
+function curveYatX(c, x){
+  if (c.type==='parabola') return c.a*x*x;
+  if (c.type==='line') return c.m*x+c.b;
+  if (c.type==='inverse') return c.k/x;
+  return null;
+}
+function describeCurveName(c){
+  if (c.type==='parabola') return `関数${c.a===1?'y=x²':`y=${formatNum(c.a)}x²`}`;
+  if (c.type==='inverse') return `関数y=${c.k}/x`;
+  if (c.type==='vline') return `直線x=${formatNum(c.x)}`;
+  return `直線${fmtLinear(c.m,c.b)}`;
+}
+
+/* ============ 場面(シーン)生成エンジン ============ */
+function makeLabelPool(){
+  const labels=['A','B','C','D','E','F','G','H','I','J','K','L','N','Q','R','S'];
+  let li=0;
+  return {next:()=>labels[li++]};
+}
+function makeXPool(){
+  const used=new Set();
+  return function freshX(range=[-6,6], excludeZero=true){
+    let x, guard=0;
+    do { x=randInt(range[0],range[1]); guard++; } while((excludeZero&&x===0||used.has(x))&&guard<80);
+    used.add(x);
+    return x;
+  };
+}
+
+function buildScene(config){
+  const {nPara, nLine, nAxisLine, hasInv} = config;
+  const curves=[], points=[];
+  const {next:nextLabel} = makeLabelPool();
+  const freshX = makeXPool();
+  const usedA = new Set();
+
+  for (let i=0;i<nPara;i++){
+    let a;
+    const aChoices = i===1
+      ? [1,0.5,1/3,0.25,2,1/6,-1,-0.5,-1/3,-0.25,-2,-1/6]
+      : [1,0.5,1/3,0.25,2,1/6];
+    do { a=choice(aChoices); } while (usedA.has(a) && usedA.size<aChoices.length);
+    usedA.add(a);
+    const curveIdx=curves.length;
+    curves.push({type:'parabola', a, pointLabels:[]});
+    for (let j=0;j<2;j++){
+      const x0=freshX();
+      const label=nextLabel();
+      points.push({x:x0,y:a*x0*x0,label,curveIdx,isIntersection:false});
+      curves[curveIdx].pointLabels.push(label);
+    }
+  }
+  function tryIntersectionPoint(minAbsY){
+    const existingCurves = curves.filter(cv=>cv.type!=='vline');
+    if (existingCurves.length===0) return null;
+    for (let attempt=0; attempt<30; attempt++){
+      const T = choice(existingCurves);
+      let x0;
+      if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
+      else x0 = freshX();
+      const y0 = curveYatX(T, x0);
+      if (!isNice(y0,8) || Math.abs(y0)>40) continue;
+      if (minAbsY!==undefined && Math.abs(y0)<minAbsY) continue;
+      return {x0,y0,T};
+    }
+    return null;
+  }
+  function tryIntersectionPointForVertical(minAbsX){
+    const existingCurves = curves.filter(cv=>cv.type!=='vline');
+    if (existingCurves.length===0) return null;
+    for (let attempt=0; attempt<30; attempt++){
+      const T = choice(existingCurves);
+      let x0;
+      if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
+      else x0 = freshX();
+      if (Math.abs(x0)<minAbsX) continue;
+      const y0 = curveYatX(T, x0);
+      if (!isNice(y0,8) || Math.abs(y0)>40) continue;
+      return {x0,y0,T};
+    }
+    return null;
+  }
+  const AXIS_MIN_DIST = 2;
+
+  // 一次関数(一般の傾いた直線) nLine本
+  for (let i=0;i<nLine;i++){
+    let built=false;
+    if (points.length>=2 && Math.random()<0.85){
+      const idxs=[...points.keys()];
+      for (let t=0;t<12 && !built;t++){
+        const i1=choice(idxs); let i2=choice(idxs);
+        if (i1===i2) continue;
+        if (points[i1].curveIdx === points[i2].curveIdx) continue;
+        const P1=points[i1], P2=points[i2];
+        if (Math.abs(P1.x-P2.x)<1e-9) continue;
+        const m=(P2.y-P1.y)/(P2.x-P1.x), b=P1.y-m*P1.x;
+        if (Math.abs(m)<1e-9) continue;
+        if (!isNice(m,6)||!isNice(b,6)) continue;
+        if (Math.abs(m)>10||Math.abs(b)>25) continue;
+        curves.push({type:'line', m, b, connector:true, through:[P1.label,P2.label], pointLabels:[]});
+        built=true;
+      }
+    }
+    if (built) continue;
+    const curveIdx = curves.length;
+    let sharedPoint = null;
+    const existingOthers = curves.filter(cv=>cv.type!=='vline');
+    if (existingOthers.length>0 && Math.random()<0.92){
+      for (let attempt=0; attempt<25 && !sharedPoint; attempt++){
+        const T = choice(existingOthers);
+        let x0;
+        if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
+        else x0 = freshX();
+        const y0 = curveYatX(T, x0);
+        const m = choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]);
+        const b = y0 - m*x0;
+        if (!isNice(b,8) || Math.abs(b)>25) continue;
+        sharedPoint = {x0,y0,m,b,T};
+      }
+    }
+    if (sharedPoint){
+      const {x0,y0,m,b,T} = sharedPoint;
+      const label = nextLabel();
+      curves.push({type:'line', m, b, connector:false, pointLabels:[label], sharedIntersection:true, intersectsWith:T, _sharedLabel:label});
+      points.push({x:x0,y:y0,label,curveIdx,isIntersection:true});
+      const x1=freshX(); const label2=nextLabel();
+      points.push({x:x1,y:m*x1+b,label:label2,curveIdx,isIntersection:false});
+      curves[curveIdx].pointLabels.push(label2);
+    } else {
+      const m = choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]);
+      const b = randInt(-8,8);
+      curves.push({type:'line', m, b, connector:false, pointLabels:[]});
+      for (let j=0;j<2;j++){
+        const x0=freshX();
+        const label=nextLabel();
+        points.push({x:x0,y:m*x0+b,label,curveIdx,isIntersection:false});
+        curves[curveIdx].pointLabels.push(label);
+      }
+    }
+  }
+
+  // 軸に平行な直線(x=定数、y=定数) nAxisLine本
+  for (let i=0;i<nAxisLine;i++){
+    const curveIdx = curves.length;
+    const horizontal = Math.random()<0.5;
+    if (horizontal){
+      const hit = tryIntersectionPoint(AXIS_MIN_DIST);
+      let b;
+      if (hit) b = hit.y0;
+      else { const mag = randInt(2,8); b = Math.random()<0.5 ? mag : -mag; }
+      curves.push({type:'line', m:0, b, connector:false, pointLabels:[], sharedIntersection: !!hit, intersectsWith: hit?hit.T:null});
+      const label = nextLabel();
+      if (hit) curves[curveIdx]._sharedLabel = label;
+      points.push({x: hit?hit.x0:freshX(), y:b, label, curveIdx, isIntersection: !!hit});
+      curves[curveIdx].pointLabels.push(label);
+      const x1=freshX(); const label2=nextLabel();
+      points.push({x:x1,y:b,label:label2,curveIdx,isIntersection:false});
+      curves[curveIdx].pointLabels.push(label2);
+    } else {
+      const hit = tryIntersectionPointForVertical(AXIS_MIN_DIST);
+      let c;
+      if (hit) c = hit.x0;
+      else { const mag = randInt(2,8); c = Math.random()<0.5 ? mag : -mag; }
+      curves.push({type:'vline', x:c, connector:false, pointLabels:[], sharedIntersection: !!hit, intersectsWith: hit?hit.T:null});
+      const label = nextLabel();
+      if (hit) curves[curveIdx]._sharedLabel = label;
+      points.push({x:c, y: hit?hit.y0:randInt(-8,8), label, curveIdx, isIntersection: !!hit});
+      curves[curveIdx].pointLabels.push(label);
+      const y1=randInt(-8,8); const label2=nextLabel();
+      points.push({x:c,y:y1,label:label2,curveIdx,isIntersection:false});
+      curves[curveIdx].pointLabels.push(label2);
+    }
+  }
+
+  if (hasInv){
+    const k = choice([6,8,9,10,12,15,16,18,20,24]);
+    const curveIdx=curves.length;
+    curves.push({type:'inverse', k, pointLabels:[]});
+    const nPts = (nPara===0 && nLine===0) ? 2 : 1;
+    for (let j=0;j<nPts;j++){
+      const x0 = Math.abs(freshX([2,9]));
+      const label=nextLabel();
+      points.push({x:x0,y:k/x0,label,curveIdx,isIntersection:false});
+      curves[curveIdx].pointLabels.push(label);
+    }
+  }
+  return {curves, points};
+}
+
+/* ============ 設問メニュー ============ */
+function polygonAreaSorted(points){
+  const cx = points.reduce((s,p)=>s+p[0],0)/points.length;
+  const cy = points.reduce((s,p)=>s+p[1],0)/points.length;
+  const sorted = [...points].sort((a,b)=>Math.atan2(a[1]-cy,a[0]-cx) - Math.atan2(b[1]-cy,b[0]-cx));
+  return {area: shoelace(sorted), order: sorted};
+}
+function preferredPool(points, minCount, includeOrigin){
+  const withO = includeOrigin ? [{x:0,y:0,label:'O',isIntersection:true}, ...points] : points;
+  const inter = withO.filter(p=>p.isIntersection);
+  return inter.length>=minCount ? inter : withO;
+}
+function qQuadArea(scene){
+  const pool = preferredPool(scene.points, 4, true);
+  if (pool.length<4) return null;
+  for (let tries=0; tries<20; tries++){
+    const idxs=[...pool.keys()];
+    const chosen=[];
+    while (chosen.length<4){ const i=choice(idxs); if(!chosen.includes(i)) chosen.push(i); }
+    const pts = chosen.map(i=>pool[i]);
+    const {area, order} = polygonAreaSorted(pts.map(p=>[p.x,p.y]));
+    if (area<1 || area>350 || !isNice(area,12)) continue;
+    let degenerate=false;
+    for (let k=0;k<order.length;k++){
+      const p1=order[k], p2=order[(k+1)%order.length], p3=order[(k+2)%order.length];
+      if (collinear(p1,p2,p3)) { degenerate=true; break; }
+    }
+    if (degenerate) continue;
+    const orderLabels = order.map(([x,y])=>pts.find(p=>Math.abs(p.x-x)<1e-9&&Math.abs(p.y-y)<1e-9).label);
+    const triArea1 = shoelace([order[0],order[1],order[2]]);
+    const triArea2 = shoelace([order[0],order[2],order[3]]);
+    return {
+      kind:'quad', extraPoints:[], quadPts: orderLabels,
+      prompt: `4点${orderLabels.join('、')}を結んでできる四角形の面積を求めなさい。`,
+      final: `${formatNum(area,20)}`,
+      steps: `4点を順に${orderLabels.join('→')}→${orderLabels[0]}と結んでできる四角形について考える。\n対角線${orderLabels[0]}${orderLabels[2]}を引くと、四角形は△${orderLabels[0]}${orderLabels[1]}${orderLabels[2]}と△${orderLabels[0]}${orderLabels[2]}${orderLabels[3]}の2つの三角形に分けられる。\nそれぞれの面積を求めると、△${orderLabels[0]}${orderLabels[1]}${orderLabels[2]}=${formatNum(triArea1,20)}、△${orderLabels[0]}${orderLabels[2]}${orderLabels[3]}=${formatNum(triArea2,20)}となるので、\n四角形の面積=${formatNum(triArea1,20)}+${formatNum(triArea2,20)}=${formatNum(area,20)}。`
+    };
+  }
+  return null;
+}
+function rangeOfParabola(a, d1, d2){
+  const ys=[a*d1*d1, a*d2*d2];
+  if (d1<=0 && d2>=0){
+    return a>=0 ? [0, Math.max(...ys)] : [Math.min(...ys), 0];
+  }
+  return [Math.min(...ys), Math.max(...ys)];
+}
+function qRange(scene){
+  const paraCurves = scene.curves.filter(c=>c.type==='parabola');
+  if (paraCurves.length===0) return null;
+  const c = choice(paraCurves);
+  const curveIdx = scene.curves.indexOf(c);
+  const d1 = randInt(-8,-1), d2 = randInt(1,8);
+  const [lo,hi] = rangeOfParabola(c.a, d1, d2);
+  const y1 = c.a*d1*d1, y2 = c.a*d2*d2;
+  const includesZero = d1<=0 && d2>=0;
+  return { kind:'range', extraPoints:[], curveIdx,
+    prompt: `${describeCurveName(c)}について、xの変域が${formatNum(d1)}≦x≦${formatNum(d2)}のときのyの変域を求めなさい。`,
+    final: `${formatNum(lo)} ≦ y ≦ ${formatNum(hi)}`,
+    steps: `a${c.a>0?'>0':'<0'}の放物線は${c.a>0?'下':'上'}に凸で、頂点(原点)で${c.a>0?'最小':'最大'}になる。\nx=${formatNum(d1)}のときy=${formatNum(c.a)}×(${formatNum(d1)})²=${formatNum(y1)}、x=${formatNum(d2)}のときy=${formatNum(c.a)}×(${formatNum(d2)})²=${formatNum(y2)}となる。\n` +
+      (includesZero
+        ? `変域が0をまたいでいるので、${c.a>0?'最小値は頂点のy座標である0':'最大値は頂点のy座標である0'}になり、${c.a>0?'最大値':'最小値'}はx=${formatNum(d1)},${formatNum(d2)}の2つのyの値のうち絶対値が大きい方の${formatNum(c.a>0?hi:lo)}になる。`
+        : `変域が0をまたいでいないので、xの値が0に近いほどyの絶対値は小さくなる。よって${formatNum(y1)}と${formatNum(y2)}を比べて、小さい方が最小値${formatNum(lo)}、大きい方が最大値${formatNum(hi)}になる。`) +
+      `\n以上より、${formatNum(lo)} ≦ y ≦ ${formatNum(hi)}。` };
+}
+function qLineThrough2(scene){
+  const pool = preferredPool(scene.points, 2, false);
+  if (pool.length<2) return null;
+  for (let tries=0; tries<15; tries++){
+    const idxs=[...pool.keys()];
+    const i1=choice(idxs); let i2=choice(idxs);
+    if (i1===i2) continue;
+    const P1=pool[i1], P2=pool[i2];
+    if (Math.abs(P1.x-P2.x)<1e-9) continue;
+    const m=(P2.y-P1.y)/(P2.x-P1.x), b=P1.y-m*P1.x;
+    if (!isNice(m,8)||!isNice(b,8)) continue;
+    if (Math.abs(m)>15||Math.abs(b)>40) continue;
+    return { kind:'line2pt', extraPoints:[], p1Label:P1.label, p2Label:P2.label,
+      prompt: `2点${P1.label}、${P2.label}を通る直線の式を求めなさい。`,
+      final: fmtLinear(m,b),
+      steps: `2点${P1.label}${fmtPoint(P1.x,P1.y)}、${P2.label}${fmtPoint(P2.x,P2.y)}を通る直線の式をy=mx+bとおく。\n傾きmは、xの増加量とyの増加量の比から\nm=(${formatNum(P2.y)}−(${formatNum(P1.y)}))÷(${formatNum(P2.x)}−(${formatNum(P1.x)}))=${formatNum(m)}\nとなる。y=${formatNum(m)}x+bに${P1.label}の座標を代入すると\n${formatNum(P1.y)}=${formatNum(m)}×(${formatNum(P1.x)})+b\nより、b=${formatNum(b)}。よって直線の式は${fmtLinear(m,b)}。` };
+  }
+  return null;
+}
+function qTriangleArea(scene){
+  const allPts = preferredPool(scene.points, 3, true);
+  if (allPts.length<3) return null;
+  for (let tries=0; tries<15; tries++){
+    const idxs=[...allPts.keys()];
+    const chosen=[];
+    while (chosen.length<3){ const i=choice(idxs); if(!chosen.includes(i)) chosen.push(i); }
+    const [p1,p2,p3] = chosen.map(i=>allPts[i]);
+    if (collinear([p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y])) continue;
+    const area = shoelace([[p1.x,p1.y],[p2.x,p2.y],[p3.x,p3.y]]);
+    if (area > 300 || area < 0.1 || !isNice(area,12)) continue;
+    return { kind:'area', extraPoints:[], trianglePts:[p1.label,p2.label,p3.label],
+      prompt: `3点${p1.label}、${p2.label}、${p3.label}を結んでできる三角形の面積を求めなさい。`,
+      final: `${formatNum(area,20)}`,
+      steps: `${p1.label}${fmtPoint(p1.x,p1.y)}、${p2.label}${fmtPoint(p2.x,p2.y)}、${p3.label}${fmtPoint(p3.x,p3.y)}とする。\nシューレース公式(座標から直接面積を求める公式)を使うと、\n面積=(1/2)|x${p1.label}(y${p2.label}−y${p3.label})+x${p2.label}(y${p3.label}−y${p1.label})+x${p3.label}(y${p1.label}−y${p2.label})|\nに座標を代入して計算すると、面積=${formatNum(area,20)}となる。\n(補助線を引いて長方形から余分な三角形を引く方法でも同じ値が求められる。)` };
+  }
+  return null;
+}
+function qBisectMedian(scene){
+  const allPts = preferredPool(scene.points, 3, true);
+  if (allPts.length<3) return null;
+  for (let tries=0; tries<20; tries++){
+    const idxs=[...allPts.keys()];
+    const chosen=[];
+    while (chosen.length<3){ const i=choice(idxs); if(!chosen.includes(i)) chosen.push(i); }
+    const [v,p1,p2] = chosen.map(i=>allPts[i]);
+    if (collinear([v.x,v.y],[p1.x,p1.y],[p2.x,p2.y])) continue;
+    const M = [(p1.x+p2.x)/2, (p1.y+p2.y)/2];
+    if (Math.abs(M[0]-v.x)<1e-9) continue;
+    const m=(M[1]-v.y)/(M[0]-v.x), b=v.y-m*v.x;
+    if (!isNice(m,8)||!isNice(b,8)) continue;
+    if (Math.abs(m)>15||Math.abs(b)>40) continue;
+    return { kind:'bisect', extraPoints:[{x:M[0],y:M[1],label:'M'}], trianglePts:[v.label,p1.label,p2.label],
+      prompt: `3点${v.label}、${p1.label}、${p2.label}を結んでできる三角形について、頂点${v.label}を通り、この三角形の面積を2等分する直線の式を求めなさい。`,
+      final: fmtLinear(m,b),
+      steps: `三角形の面積を2等分する直線は、必ず「1つの頂点」と「その向かい側の辺の中点」を通る(中線)。これは、中線で分けられた2つの三角形が底辺の長さが等しく高さが共通なため、面積も等しくなるからである。\n線分${p1.label}${p2.label}の中点をMとすると、\nM=((${formatNum(p1.x)}+${formatNum(p2.x)})/2, (${formatNum(p1.y)}+${formatNum(p2.y)})/2)=${fmtPoint(M[0],M[1])}\nとなる。頂点${v.label}${fmtPoint(v.x,v.y)}とMを通る直線の傾きは\nm=(${formatNum(M[1])}−(${formatNum(v.y)}))÷(${formatNum(M[0])}−(${formatNum(v.x)}))=${formatNum(m)}\nで、これを使って切片を求めると、直線の式は${fmtLinear(m,b)}となる。` };
+  }
+  return null;
+}
+function intersectCurves(cA, cB){
+  if (cA.type==='vline' && cB.type==='vline') return [];
+  if (cA.type==='parabola' && cB.type==='parabola') return [];
+  if (cA.type==='vline'){
+    const x0=cA.x;
+    if (cB.type==='inverse' && Math.abs(x0)<1e-9) return [];
+    const y0=curveYatX(cB,x0);
+    return [[x0,y0]];
+  }
+  if (cB.type==='vline') return intersectCurves(cB,cA);
+  if (cA.type==='line' && cB.type==='line'){
+    if (Math.abs(cA.m-cB.m)<1e-9) return [];
+    const x0=(cB.b-cA.b)/(cA.m-cB.m);
+    return [[x0, cA.m*x0+cA.b]];
+  }
+  if ((cA.type==='line'&&cB.type==='parabola')||(cA.type==='parabola'&&cB.type==='line')){
+    const line = cA.type==='line'?cA:cB, para = cA.type==='parabola'?cA:cB;
+    const A=para.a, B=-line.m, C=-line.b;
+    const d=B*B-4*A*C;
+    if (d<0) return [];
+    const sd=Math.sqrt(d);
+    return [(-B+sd)/(2*A),(-B-sd)/(2*A)].map(x=>[x, para.a*x*x]);
+  }
+  if ((cA.type==='line'&&cB.type==='inverse')||(cA.type==='inverse'&&cB.type==='line')){
+    const line = cA.type==='line'?cA:cB, inv = cA.type==='inverse'?cA:cB;
+    const A=line.m, B=line.b, C=-inv.k;
+    if (Math.abs(A)<1e-9){
+      if (Math.abs(B)<1e-9) return [];
+      const x0=inv.k/B;
+      return [[x0,B]];
+    }
+    const d=B*B-4*A*C;
+    if (d<0) return [];
+    const sd=Math.sqrt(d);
+    return [(-B+sd)/(2*A),(-B-sd)/(2*A)].filter(x=>Math.abs(x)>1e-6).map(x=>[x, inv.k/x]);
+  }
+  return [];
+}
+function qIntersectionGeneral(scene){
+  const nonConnector = scene.curves.filter(c=>!c.connector);
+  if (nonConnector.length<2) return null;
+  const pairs=[];
+  for (let i=0;i<nonConnector.length;i++) for (let j=i+1;j<nonConnector.length;j++) pairs.push([nonConnector[i],nonConnector[j]]);
+  for (let tries=0;tries<15;tries++){
+    const [cA,cB]=choice(pairs);
+    const allSols = intersectCurves(cA,cB);
+    const sols = allSols.filter(([x,y])=>isNice(x,4)&&isNice(y,4)&&Math.abs(x)<20&&Math.abs(y)<60&&(Math.abs(x)>0.4||Math.abs(y)>0.4));
+    if (sols.length===0) continue;
+    const [x0,y0] = choice(sols);
+    const nameOf = c => c.type==='parabola'?`放物線${c.a===1?'y=x²':`y=${formatNum(c.a)}x²`}`:c.type==='vline'?`直線x=${formatNum(c.x)}`:c.type==='inverse'?`反比例y=${c.k}/x`:`直線${fmtLinear(c.m,c.b)}`;
+    const eqOf = c => c.type==='parabola'?(c.a===1?'x²':`${formatNum(c.a)}x²`):c.type==='inverse'?`${c.k}/x`:c.type==='vline'?null:fmtLinear(c.m,c.b).replace('y = ','');
+    const needsQualifier = allSols.length >= 2;
+    const qualifier = needsQualifier ? `のうち、x座標が${x0<0?'負':'正'}である点を` : 'である点を';
+
+    let stepDetail;
+    if (cA.type==='vline' || cB.type==='vline'){
+      const vl = cA.type==='vline'?cA:cB, other = cA.type==='vline'?cB:cA;
+      stepDetail = `直線x=${formatNum(vl.x)}上の点なので、x=${formatNum(vl.x)}を${nameOf(other)}の式に代入すると、\ny=${eqOf(other)}にx=${formatNum(vl.x)}を代入してy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+    } else if (cA.type==='line' && cB.type==='line'){
+      stepDetail = `2つの直線の式 y=${eqOf(cA)} と y=${eqOf(cB)} を連立させる。\n${eqOf(cA)}=${eqOf(cB)}を解いてxを求めると、x=${formatNum(x0)}。\nこれをどちらかの式に代入するとy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+    } else {
+      const curveEq = cA.type!=='line' ? cA : cB;
+      const lineEq = cA.type==='line' ? cA : cB;
+      stepDetail = `${nameOf(curveEq)}と${nameOf(lineEq)}を連立させる。\ny=${eqOf(curveEq)}とy=${eqOf(lineEq)}が等しいとおくと、${eqOf(curveEq)}=${eqOf(lineEq)}という方程式ができる。\nこれを整理して2次方程式を解くと、x=${formatNum(x0)}(もう1つの解は求める点と異なるので除く)。\nこれを代入するとy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+    }
+
+    return {
+      kind:'intersect', extraPoints:[{x:x0,y:y0,label:'P'}],
+      curveIdxs:[scene.curves.indexOf(cA), scene.curves.indexOf(cB)],
+      prompt: `${nameOf(cA)}と${nameOf(cB)}の交点${qualifier}Pとする。点Pの座標を求めなさい。`,
+      final: fmtPoint(x0,y0),
+      steps: stepDetail
+    };
+  }
+  return null;
+}
+
+function simplifySqrt(n){
+  n = Math.round(n);
+  let coef=1, radical=n;
+  for (let i=2; i*i<=radical; i++){ while (radical % (i*i) === 0){ radical/=(i*i); coef*=i; } }
+  return {coef, radical};
+}
+function fmtSqrt(n){
+  if (n<0) return null;
+  const r = Math.sqrt(n);
+  if (Number.isInteger(r)) return `${r}`;
+  const {coef, radical} = simplifySqrt(n);
+  if (radical===1) return `${coef}`;
+  return coef===1 ? `√${radical}` : `${coef}√${radical}`;
+}
+function solveQuadratic(A,B,C){
+  if (Math.abs(A)<1e-12){ if (Math.abs(B)<1e-12) return []; return [-C/B]; }
+  const d=B*B-4*A*C;
+  if (d<-1e-9) return [];
+  const sd=Math.sqrt(Math.max(d,0));
+  return [(-B+sd)/(2*A),(-B-sd)/(2*A)];
+}
+
+/* ===== 動点+面積条件 ===== */
+function allAreaSolutions(curve, F1,F2, targetArea){
+  const [x1,y1]=F1, [x2,y2]=F2;
+  if (curve.type==='line'){
+    const {m,b}=curve;
+    const A = m*(x2-x1)+(y1-y2);
+    const B = x1*y2-x2*y1 + b*(x2-x1);
+    const res=[];
+    for (const target of [2*targetArea,-2*targetArea]) if (Math.abs(A)>1e-12) res.push((target-B)/A);
+    return res;
+  }
+  if (curve.type==='parabola'){
+    const {a}=curve;
+    const Ac=a*(x2-x1), Bc=(y1-y2), Cc=x1*y2-x2*y1;
+    let res=[];
+    for (const target of [2*targetArea,-2*targetArea]) res=res.concat(solveQuadratic(Ac,Bc,Cc-target));
+    return res;
+  }
+  if (curve.type==='inverse'){
+    const {k}=curve;
+    let res=[];
+    for (const sign of [1,-1]){
+      const Ac=(y1-y2), Bc=(x1*y2-x2*y1-sign*2*targetArea), Cc=k*(x2-x1);
+      res=res.concat(solveQuadratic(Ac,Bc,Cc));
+    }
+    return res.filter(t=>Math.abs(t)>1e-6);
+  }
+  return [];
+}
+function qMovingArea(scene){
+  const hosts = scene.curves.filter(c=>c.type==='parabola'||c.type==='line'||c.type==='inverse');
+  if (hosts.length===0) return null;
+  const pool = preferredPool(scene.points, 2, true);
+  if (pool.length<2) return null;
+  for (let attempt=0; attempt<250; attempt++){
+    const host = choice(hosts);
+    let t;
+    if (host.type==='inverse'){
+      const mag = choice([2,3,4,5,6,7]);
+      t = host.k>0 ? mag : -mag;
+    } else if (host.type==='parabola'){
+      t = choice([-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7]);
+    } else {
+      t = randInt(-7,7);
+    }
+    const idxs=[...pool.keys()];
+    const i1=choice(idxs); let i2=choice(idxs);
+    if (i1===i2) continue;
+    const F1p=pool[i1], F2p=pool[i2];
+    if (F1p.x===F2p.x && F1p.y===F2p.y) continue;
+    const F1=[F1p.x,F1p.y], F2=[F2p.x,F2p.y];
+    const Py = curveYatX(host,t);
+    const P=[t,Py];
+    if (collinear(P,F1,F2)) continue;
+    const targetArea = shoelace([P,F1,F2]);
+    if (targetArea<1 || targetArea>150 || !isNice(targetArea,12)) continue;
+
+    const allSols = allAreaSolutions(host,F1,F2,targetArea)
+      .filter(x=>isNice(x,4) && Math.abs(x)<20 && (host.type!=='inverse' || Math.abs(x)>0.3));
+    const uniqueSols=[...new Set(allSols.map(x=>Math.round(x*1e6)/1e6))];
+    if (!uniqueSols.some(x=>Math.abs(x-t)<1e-6)) continue;
+    if (uniqueSols.length>2) continue;
+
+    let domainText = '';
+    if (uniqueSols.length===2){
+      const other = uniqueSols.find(x=>Math.abs(x-t)>1e-6);
+      if (other===undefined || !isNice(other,6)) continue;
+      domainText = `点Pのx座標が${t>other?`${formatNum(other)}より大きい数`:`${formatNum(other)}より小さい数`}であるとき、`;
+    }
+
+    const hostName = host.type==='parabola'?`放物線${host.a===1?'y=x²':`y=${formatNum(host.a)}x²`}`:host.type==='inverse'?`反比例y=${host.k}/x`:`直線${fmtLinear(host.m,host.b)}`;
+    const hostEqDesc = host.type==='parabola'?`P(t, ${host.a===1?'t²':`${formatNum(host.a)}t²`})`:host.type==='inverse'?`P(t, ${host.k}/t)`:`P(t, ${fmtLinear(host.m,host.b).replace('y = ','')})`;
+    return {
+      kind:'movArea', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label,F2p.label], hostIdx: scene.curves.indexOf(host),
+      prompt: `${hostName}上に動く点Pをとる。${domainText}△P${F1p.label}${F2p.label}の面積が${formatNum(targetArea,12)}となるとき、点Pの座標を求めなさい。`,
+      final: `P${fmtPoint(t,Py)}`,
+      steps: `点Pのx座標をtとおくと、${hostEqDesc}と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}、${F2p.label}${fmtPoint(F2p.x,F2p.y)}は分かっているので、△P${F1p.label}${F2p.label}の面積をtの式で表す(シューレース公式や、座標軸に垂直な補助線で長方形から余分な三角形を引く方法で表せる)。\nその式が${formatNum(targetArea,12)}に等しくなるという方程式を作って解くと、t=${formatNum(t)}(このときの条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
+    };
+  }
+  return null;
+}
+
+/* ===== 動点+線分の長さ条件 ===== */
+function solveDistOnLine(m,b,F1,D){
+  const [x1,y1]=F1;
+  const A = 1+m*m;
+  const B = -2*(x1 + m*(y1-b));
+  const C = x1*x1 + (y1-b)*(y1-b) - D;
+  return solveQuadratic(A,B,C);
+}
+function qMovingLength(scene){
+  const lineHosts = scene.curves.filter(c=>c.type==='line');
+  if (lineHosts.length===0) return null;
+  const pool = preferredPool(scene.points, 1, true);
+  if (pool.length<1) return null;
+  for (let attempt=0; attempt<250; attempt++){
+    const host = choice(lineHosts);
+    const t = randInt(-7,7);
+    const F1p = choice(pool);
+    const F1 = [F1p.x, F1p.y];
+    const Py = host.m*t+host.b;
+    const P = [t,Py];
+    if (Math.abs(P[0]-F1[0])<1e-9 && Math.abs(P[1]-F1[1])<1e-9) continue;
+    const D = (P[0]-F1[0])**2 + (P[1]-F1[1])**2;
+    if (D<1 || D>150 || Math.abs(D-Math.round(D))>1e-6) continue;
+
+    const sols = solveDistOnLine(host.m,host.b,F1,D).filter(x=>isNice(x,4)&&Math.abs(x)<20);
+    const uniqueSols=[...new Set(sols.map(x=>Math.round(x*1e6)/1e6))];
+    if (!uniqueSols.some(x=>Math.abs(x-t)<1e-6)) continue;
+    if (uniqueSols.length>2) continue;
+
+    let domainText='';
+    if (uniqueSols.length===2){
+      const other = uniqueSols.find(x=>Math.abs(x-t)>1e-6);
+      if (other===undefined || !isNice(other,6)) continue;
+      domainText = `点Pのx座標が${t>other?`${formatNum(other)}より大きい数`:`${formatNum(other)}より小さい数`}であるとき、`;
+    }
+
+    const lenStr = fmtSqrt(D);
+    return {
+      kind:'movLength', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label], hostIdx: scene.curves.indexOf(host),
+      prompt: `直線${fmtLinear(host.m,host.b)}上に動く点Pをとる。${domainText}線分P${F1p.label}の長さが${lenStr}となるとき、点Pの座標を求めなさい。`,
+      final: `P${fmtPoint(t,Py)}`,
+      steps: `点Pのx座標をtとおくと、P(t, ${fmtLinear(host.m,host.b).replace('y = ','')})と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}との距離の2乗は、三平方の定理(2点間の距離の公式)から\nP${F1p.label}²=(t−(${formatNum(F1p.x)}))²+(${fmtLinear(host.m,host.b).replace('y = ','')}−(${formatNum(F1p.y)}))²\nと表せる。線分P${F1p.label}の長さが${lenStr}なので、この式が${lenStr}の2乗、つまり${D}に等しいとして方程式を解くと、t=${formatNum(t)}(条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
+    };
+  }
+  return null;
+}
+
+const PRIORITY = ['movArea','movLength','intersect','bisect','quad','area','line2pt','range'];
+function pickQuestions(scene){
+  const results = {
+    range: qRange(scene), line2pt: qLineThrough2(scene),
+    area: qTriangleArea(scene), bisect: qBisectMedian(scene),
+    intersect: qIntersectionGeneral(scene), quad: qQuadArea(scene),
+    movArea: qMovingArea(scene), movLength: qMovingLength(scene)
+  };
+  const usable = Object.entries(results).filter(([k,v])=>v!==null);
+  if (usable.length < 3) return null;
+  let closingKey = PRIORITY.find(k=>results[k]!==null);
+  const remaining = usable.filter(([k])=>k!==closingKey);
+  for (let i=remaining.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [remaining[i],remaining[j]]=[remaining[j],remaining[i]]; }
+  return [...remaining.slice(0,2).map(([k,v])=>v), results[closingKey]];
+}
+function generateProblem(config, desiredPoints){
+  let best = null;
+  const maxAttempts = desiredPoints ? 400 : 80;
+  for (let attempt=0; attempt<maxAttempts; attempt++){
+    const scene = buildScene(config);
+    const qs = pickQuestions(scene);
+    if (!qs) continue;
+    const pruned = pruneScene(scene, qs);
+    const problem = { scene: pruned, setup: buildSetupText(pruned), questions: qs };
+    if (!desiredPoints) return problem;
+    if (pruned.points.length === desiredPoints) return problem;
+    if (!best || Math.abs(pruned.points.length-desiredPoints) < Math.abs(best.scene.points.length-desiredPoints)){
+      best = problem;
+    }
+  }
+  return best;
+}
+
+/* ============ 使われている点・曲線だけに刈り込む ============ */
+function pruneScene(scene, questions){
+  const requiredLabels = new Set();
+  const addAll = arr => { if (arr) arr.forEach(l=>{ if (l!=='O') requiredLabels.add(l); }); };
+  for (const q of questions){
+    if (q.p1Label) requiredLabels.add(q.p1Label);
+    if (q.p2Label) requiredLabels.add(q.p2Label);
+    addAll(q.trianglePts);
+    addAll(q.quadPts);
+    addAll(q.refLabels);
+  }
+  const requiredCurveIdx = new Set();
+  const directCurveIdx = new Set();
+  for (const q of questions){
+    if (q.curveIdx!==undefined){ requiredCurveIdx.add(q.curveIdx); directCurveIdx.add(q.curveIdx); }
+    if (q.curveIdxs) q.curveIdxs.forEach(i=>{ requiredCurveIdx.add(i); directCurveIdx.add(i); });
+    if (q.hostIdx!==undefined){ requiredCurveIdx.add(q.hostIdx); directCurveIdx.add(q.hostIdx); }
+  }
+  for (let iter=0; iter<6; iter++){
+    let changed = false;
+    for (const p of scene.points){
+      if (requiredLabels.has(p.label) && !requiredCurveIdx.has(p.curveIdx)){
+        requiredCurveIdx.add(p.curveIdx); changed = true;
+      }
+    }
+    scene.curves.forEach((c, idx)=>{
+      if (!requiredCurveIdx.has(idx)) return;
+      if (c.connector){
+        for (const l of c.through){ if (!requiredLabels.has(l)){ requiredLabels.add(l); changed=true; } }
+      }
+      if (c.sharedIntersection && c.intersectsWith){
+        const depIdx = scene.curves.indexOf(c.intersectsWith);
+        if (depIdx>=0 && !requiredCurveIdx.has(depIdx)){ requiredCurveIdx.add(depIdx); changed=true; }
+      }
+    });
+    if (!changed) break;
+  }
+  const prunedCurves = scene.curves
+    .map((c,idx)=>({c,idx}))
+    .filter(({idx})=>requiredCurveIdx.has(idx))
+    .map(({c,idx})=>{
+      const base = c.pointLabels ? {...c, pointLabels: c.pointLabels.filter(l=>requiredLabels.has(l))} : {...c};
+      base._mentionedElsewhere = !directCurveIdx.has(idx) && (base.pointLabels? base.pointLabels.length===0 : true);
+      return base;
+    });
+  const prunedPoints = scene.points.filter(p=>requiredLabels.has(p.label));
+  return {curves: prunedCurves, points: prunedPoints};
+}
+
+/* ============ 設問文組み立て ============ */
+function ptOf(scene, label){ return scene.points.find(p=>p.label===label); }
+function buildSetupText(scene){
+  const parts = [];
+  for (const c of scene.curves){
+    const labels = c.pointLabels || [];
+    if (c.type==='parabola'){
+      if (labels.length===0){
+        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
+      } else if (labels.length===1){
+        const p1 = ptOf(scene,labels[0]);
+        parts.push(`${describeCurveName(c)}のグラフ上に点${labels[0]}があり、そのx座標は${formatNum(p1.x)}である。`);
+      } else {
+        const [l1,l2] = labels;
+        const p1=ptOf(scene,l1), p2=ptOf(scene,l2);
+        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(p1.x)}、${formatNum(p2.x)}である。`);
+      }
+    } else if (c.type==='vline'){
+      if (labels.length===0){
+        if (!c._mentionedElsewhere) parts.push(`直線x=${formatNum(c.x)}のグラフがある。`);
+      } else if (labels.length===1){
+        const l = labels[0];
+        if (c.sharedIntersection && c._sharedLabel===l){
+          parts.push(`直線x=${formatNum(c.x)}は${describeCurveName(c.intersectsWith)}と点${l}で交わる。`);
+        } else {
+          parts.push(`直線x=${formatNum(c.x)}上に点${l}があり、そのy座標は${formatNum(ptOf(scene,l).y)}である。`);
+        }
+      } else {
+        const [l1,l2] = labels;
+        if (c.sharedIntersection && c._sharedLabel===l1){
+          parts.push(`直線x=${formatNum(c.x)}は${describeCurveName(c.intersectsWith)}と点${l1}で交わる。この直線上にはさらに点${l2}があり、そのy座標は${formatNum(ptOf(scene,l2).y)}である。`);
+        } else {
+          parts.push(`直線x=${formatNum(c.x)}上に2点${l1}、${l2}があり、そのy座標はそれぞれ${formatNum(ptOf(scene,l1).y)}、${formatNum(ptOf(scene,l2).y)}である。`);
+        }
+      }
+    } else if (c.type==='line'){
+      if (c.connector){
+        parts.push(`2点${c.through[0]}、${c.through[1]}を通る直線を考える。`);
+      } else if (labels.length===0){
+        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
+      } else if (c.sharedIntersection){
+        const sharedLabel = c._sharedLabel;
+        const hasShared = labels.includes(sharedLabel);
+        const others = labels.filter(l=>l!==sharedLabel);
+        if (hasShared){
+          let s = `直線${fmtLinear(c.m,c.b)}は${describeCurveName(c.intersectsWith)}と点${sharedLabel}で交わる。`;
+          if (others.length) s += `この直線上にはさらに点${others[0]}があり、そのx座標は${formatNum(ptOf(scene,others[0]).x)}である。`;
+          parts.push(s);
+        } else if (others.length){
+          parts.push(`${describeCurveName(c)}のグラフ上に点${others[0]}があり、そのx座標は${formatNum(ptOf(scene,others[0]).x)}である。`);
+        }
+      } else if (c.isProportion){
+        if (labels.length===1){
+          parts.push(`比例y=${formatNum(c.m)}xのグラフ上に点${labels[0]}があり、そのx座標は${formatNum(ptOf(scene,labels[0]).x)}である。`);
+        } else {
+          const [l1,l2] = labels;
+          parts.push(`比例y=${formatNum(c.m)}xのグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
+        }
+      } else if (labels.length===2){
+        const [l1,l2] = labels;
+        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
+      } else {
+        const l = labels[0];
+        parts.push(`${describeCurveName(c)}のグラフ上に点${l}があり、そのx座標は${formatNum(ptOf(scene,l).x)}である。`);
+      }
+    } else if (c.type==='inverse'){
+      if (labels.length===0){
+        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
+      } else if (labels.length===2){
+        const [l1,l2] = labels;
+        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
+      } else {
+        const l = labels[0];
+        parts.push(`${describeCurveName(c)}のグラフ上に点${l}があり、そのx座標は${formatNum(ptOf(scene,l).x)}である。`);
+      }
+    }
+  }
+  return '点Oを原点とする座標平面上に、次のグラフがある。' + parts.join('');
+}
+
+/* ============ 図(SVG)への変換 ============ */
+function curvesToRenderFormat(scene, extraXs){
+  const allX = [...scene.points.map(p=>p.x), ...extraXs];
+  const minX = Math.min(0,...allX), maxX = Math.max(0,...allX);
+  return scene.curves.map(c=>{
+    if (c.type==='inverse'){
+      if (c.k>0) return {type:'inverse', k:c.k, xrange:[Math.max(0.6,minX-1), Math.max(maxX+3,3)]};
+      return {type:'inverse', k:c.k, xrange:[Math.min(minX-3,-3), Math.min(-0.6,maxX+1)]};
+    }
+    if (c.type==='vline') return {type:'vline', x:c.x};
+    return {type:c.type, a:c.a, m:c.m, b:c.b, xrange:[minX-2, maxX+2]};
+  });
+}
+function sceneToFigure(scene, extraPoints=[], segLabels=[], hintPoints=[]){
+  const needsO = segLabels.some(([a,b])=>a==='O'||b==='O') || extraPoints.some(p=>p.label==='O');
+  const basePoints = scene.points.map(p=>({x:p.x,y:p.y,label:p.label,pos: p.y>=0?'above':'below'}));
+  const pts = [...basePoints, ...extraPoints.map(p=>({x:p.x,y:p.y,label:p.label,pos: p.label==='M'?'below':'above'}))];
+  if (needsO && !pts.some(p=>p.label==='O')) pts.push({x:0,y:0,label:'O',pos:'below'});
+  const idx = label => pts.findIndex(p=>p.label===label);
+  const segments = segLabels.map(([a,b],i)=>[idx(a), idx(b), i===segLabels.length-1 && segLabels.length>2 ? 'dashed':'solid']).filter(s=>s[0]>=0&&s[1]>=0);
+  const extraXs = extraPoints.map(p=>p.x);
+  const ptsWithHints = [...pts, ...hintPoints.map(p=>({x:p.x,y:p.y,label:null}))];
+  return { curves: curvesToRenderFormat(scene, extraXs), points: ptsWithHints, segments };
+}
+function figureForQuestion(scene, q){
+  if (q.kind==='line2pt') return sceneToFigure(scene, [], [[q.p1Label,q.p2Label]]);
+  if (q.kind==='area') return sceneToFigure(scene, [], [[q.trianglePts[0],q.trianglePts[1]],[q.trianglePts[1],q.trianglePts[2]],[q.trianglePts[2],q.trianglePts[0]]]);
+  if (q.kind==='quad'){
+    const segs=[]; for (let i=0;i<4;i++) segs.push([q.quadPts[i], q.quadPts[(i+1)%4]]);
+    return sceneToFigure(scene, [], segs);
+  }
+  if (q.kind==='bisect'){
+    const [v,p1,p2] = q.trianglePts;
+    return sceneToFigure(scene, q.extraPoints, [[v,p1],[p1,p2],[p2,v],[v,'M']]);
+  }
+  if (q.kind==='intersect') return sceneToFigure(scene, q.extraPoints, []);
+  if (q.kind==='movArea'){
+    const [l1,l2] = q.refLabels;
+    return sceneToFigure(scene, q.extraPoints, [['P',l1],[l1,l2],[l2,'P']]);
+  }
+  if (q.kind==='movLength'){
+    const [l1] = q.refLabels;
+    return sceneToFigure(scene, q.extraPoints, [['P',l1]]);
+  }
+  return sceneToFigure(scene, [], []);
+}
+
+/* ============ UI ============ */
+function getConfig(){
+  const nPara = parseInt(document.getElementById('numPara').value) || 0;
+  const nLine = parseInt(document.getElementById('numLine').value) || 0;
+  const nAxisLine = parseInt(document.getElementById('numAxisLine').value) || 0;
+  const hasInv = document.getElementById('hasInverse').checked;
+  return {nPara, nLine, nAxisLine, hasInv};
+}
+function getDesiredPoints(){
+  const v = parseInt(document.getElementById('numPoints').value) || 0;
+  return v>0 ? v : null;
+}
+
+/* ============ 印刷レイアウト ============ */
+function renderPrintSubQuestion(q, idx, isLast){
+  let inner = `<div class="print-sub"><span class="qlab">(${idx+1})</span>${q.prompt}`;
+  if (isLast) inner += `<span class="process-note">求める過程も書きなさい。</span>`;
+  inner += `<div class="work-space"></div><div class="answer-line">答<span class="blank"></span></div>`;
+  inner += `</div>`;
+  return inner;
+}
+function renderPrintProblem(problem){
+  const box = document.createElement('div');
+  box.className = 'print-problem';
+  const fig1Id = `pf1-${Math.random().toString(36).slice(2,8)}`;
+  const fig2Id = `pf2-${Math.random().toString(36).slice(2,8)}`;
+  const lastQ = problem.questions[problem.questions.length-1];
+  const hasExtra = (lastQ.extraPoints && lastQ.extraPoints.length>0) || lastQ.kind==='line2pt' || lastQ.kind==='area' || lastQ.kind==='quad';
+  box.innerHTML = `
+    <div class="setup-line">
+      <p>${problem.setup}</p>
+      <div class="figbox"><div id="${fig1Id}"></div></div>
+    </div>
+    ${problem.questions.map((q,i)=>renderPrintSubQuestion(q,i, i===problem.questions.length-1)).join('')}
+    ${hasExtra ? `<div class="figbox" style="margin-top:10px;"><div id="${fig2Id}"></div><div style="font-size:11px;color:var(--sub-ink);">最後の設問の図</div></div>` : ''}
+  `;
+  requestAnimationFrame(()=>{
+    const h1 = document.getElementById(fig1Id);
+    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 195);
+    if (hasExtra){
+      const h2 = document.getElementById(fig2Id);
+      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 195);
+    }
+  });
+  return box;
+}
+function buildPrintSheet(){
+  const config = getConfig();
+  if (config.nPara===0 && config.nLine===0 && config.nAxisLine===0 && !config.hasInv){
+    alert('放物線・直線・反比例のうち、少なくとも1つは選んでください。');
+    return;
+  }
+  const desiredPoints = getDesiredPoints();
+  const problem = generateProblem(config, desiredPoints);
+  if (!problem){ alert('この組み合わせでは生成できませんでした。数を減らすか、別の組み合わせでお試しください。'); return; }
+  if (desiredPoints && problem.scene.points.length !== desiredPoints){
+    alert(`この組み合わせでは点${desiredPoints}個の問題は作れなかったため、最も近い${problem.scene.points.length}個で作成しました。`);
+  }
+
+  const area = document.getElementById('printArea');
+  area.innerHTML = '';
+
+  const head = document.createElement('div'); head.className='print-page-head';
+  head.innerHTML = `
+    <h3>関数 演習プリント</h3>
+    <div class="print-name-line">名前<span class="blank"></span>　　得点<span class="blank"></span></div>
+  `;
+  area.appendChild(head);
+  area.appendChild(renderPrintProblem(problem));
+
+  const ansPage = document.createElement('div'); ansPage.className='answer-page';
+  const ansHead = document.createElement('h3'); ansHead.textContent='解答・解説';
+  ansPage.appendChild(ansHead);
+  problem.questions.forEach((q,i)=>{
+    const item = document.createElement('div'); item.className='answer-item';
+    item.innerHTML = `<div class="ans-final"><b>(${i+1})</b> ${q.final}</div><div class="ans-steps">${q.steps || ''}</div>`;
+    ansPage.appendChild(item);
+  });
+  area.appendChild(ansPage);
+
+  area.scrollIntoView({behavior:'smooth', block:'start'});
+}
+document.getElementById('buildPrintBtn').onclick = buildPrintSheet;
+document.getElementById('doPrintBtn').onclick = () => {
+  if (!document.getElementById('printArea').innerHTML.trim()){
+    alert('先に「プリントを作成」を押してください。');
+    return;
+  }
+  window.print();
+};
+</script>
+</body>
+</html>
