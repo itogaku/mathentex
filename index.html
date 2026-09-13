@@ -79,36 +79,37 @@
     content: "単元を選んで「プリントを作成」を押してください。";
     color: var(--sub-ink); font-size: 14px;
   }
-  .print-page-head{ text-align:center; margin-bottom: 14px; border-bottom: 1px solid var(--ink); padding-bottom: 8px; }
+  .print-page-head{ text-align:center; margin-bottom: 26px; border-bottom: 1px solid var(--ink); padding-bottom: 14px; }
   .print-page-head h3{ font-family:"Shippori Mincho", serif; font-size: 22px; margin:0 0 6px; }
   .print-page-head .meta{ font-size:12px; color: var(--sub-ink); }
   .print-name-line{ margin-top:10px; font-size:13px; }
   .print-name-line .blank{ display:inline-block; width: 160px; border-bottom: 1px solid var(--ink); margin-left:8px; }
 
-  .print-problem{ margin-bottom: 16px; border: 1px solid var(--ink); padding: 14px clamp(14px,3vw,24px); }
+  .print-problem{ margin-bottom: 34px; border: 1px solid var(--ink); padding: 24px clamp(16px,4vw,32px); }
   .print-problem .setup-line{ display:flex; gap: 24px; align-items:flex-start; flex-wrap: wrap; margin: 10px 0 14px; }
   .print-problem .setup-line p{ flex:1 1 280px; font-size: 14.5px; margin:0; }
-  .print-problem .setup-line .figbox{ flex: 0 0 195px; text-align:center; }
-  .print-sub{ margin: 8px 0; font-size: 13.5px; }
+  .print-problem .setup-line .figbox{ flex: 0 0 220px; text-align:center; }
+  .print-sub{ margin: 16px 0; font-size: 14px; }
   .print-sub .qlab{ font-family:"Shippori Mincho", serif; font-weight:700; margin-right:4px; }
   .print-sub .process-note{ font-size:12.5px; color: var(--accent); margin-left:4px; }
   .answer-line{ margin-top: 10px; font-size: 13.5px; }
   .answer-line .blank{ display:inline-block; min-width: 140px; border-bottom: 1px solid var(--ink); margin-left:6px; }
-  .work-space{ height: 42px; border-bottom: 1px dashed var(--rule); margin-top: 6px; }
+  .work-space{ height: 90px; border-bottom: 1px dashed var(--rule); margin-top: 8px; }
 
   .answer-page{ margin-top: 10px; }
   .answer-page h3{ font-family:"Shippori Mincho", serif; font-size:19px; border-bottom:1px solid var(--ink); padding-bottom:8px; }
-  .answer-item{ font-size: 13px; margin-bottom:8px; }
+  .answer-item{ font-size: 13.5px; margin-bottom:14px; }
   .answer-item .ans-final{ font-weight:700; margin-bottom:4px; }
   .answer-item .ans-steps{ color: var(--sub-ink); font-size:12.5px; white-space:pre-line; margin-left: 2px; }
 
   footer.note{ margin-top: 28px; font-size: 12px; color: var(--sub-ink); border-top: 1px solid var(--rule); padding-top: 14px; }
 
+  @page{ size: portrait; }
   @media print{
-    body{ background:#fff; line-height: 1.55; font-size: 13.5px; }
+    body{ background:#fff; }
     .no-print{ display:none !important; }
     .wrap{ max-width: none; padding: 0; }
-    .print-problem{ page-break-inside: avoid; border: none; padding: 0; }
+    .print-problem{ border: none; padding: 0; }
       }
 </style>
 </head>
@@ -1145,10 +1146,10 @@ function renderPrintProblem(problem){
   `;
   requestAnimationFrame(()=>{
     const h1 = document.getElementById(fig1Id);
-    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 195);
+    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 220);
     if (hasExtra){
       const h2 = document.getElementById(fig2Id);
-      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 195);
+      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 220);
     }
   });
   return box;
