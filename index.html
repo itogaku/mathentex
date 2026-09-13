@@ -88,11 +88,16 @@
   .print-problem{ margin-bottom: 34px; border: 1px solid var(--ink); padding: 24px clamp(16px,4vw,32px); }
   .print-problem .setup-line{ display:flex; gap: 24px; align-items:flex-start; flex-wrap: wrap; margin: 10px 0 14px; }
   .print-problem .setup-line p{ flex:1 1 280px; font-size: 14.5px; margin:0; }
-  .print-problem .setup-line .figbox{ flex: 0 0 220px; text-align:center; }
+  .print-problem .setup-line .figbox{ flex: 0 0 280px; text-align:center; }
   .print-sub{ margin: 16px 0; font-size: 14px; }
   .print-sub .qlab{ font-family:"Shippori Mincho", serif; font-weight:700; margin-right:4px; }
   .print-sub .process-note{ font-size:12.5px; color: var(--accent); margin-left:4px; }
   .answer-line{ margin-top: 10px; font-size: 13.5px; }
+  .mathexpr, .mathnum{
+    font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+    letter-spacing: 0.01em;
+  }
+  .mathexpr i, .mathnum i{ font-style: italic; }
   .frac{
     display:inline-flex; flex-direction:column; vertical-align:-0.55em;
     text-align:center; margin:0 1px; line-height:1; font-size:0.85em;
@@ -196,18 +201,22 @@ function isNice(x, maxDenom=4){ return toFraction(x, maxDenom) !== null; }
 function formatNum(x, maxDenom=12){
   if (Object.is(x,-0)) x=0;
   const f = toFraction(x, maxDenom);
-  if (!f) return (Math.round(x*1000)/1000).toString();
-  if (f.den === 1) return f.num.toString();
+  if (!f) return `<span class="mathnum">${(Math.round(x*1000)/1000)}</span>`;
+  if (f.den === 1) return `<span class="mathnum">${f.num}</span>`;
   const sign = f.num<0 ? '-' : '';
-  return `${sign}<span class="frac"><span class="fnum">${Math.abs(f.num)}</span><span class="fden">${f.den}</span></span>`;
+  return `<span class="mathnum">${sign}<span class="frac"><span class="fnum">${Math.abs(f.num)}</span><span class="fden">${f.den}</span></span></span>`;
 }
 function fmtLinear(m,b){
-  if (m===0) return `y = ${formatNum(b)}`;
-  let mPart = m===1?'x':(m===-1?'-x':`${formatNum(m)}x`);
-  if (b===0) return `y = ${mPart}`;
-  return `y = ${mPart} ${b>0?'+':'-'} ${formatNum(Math.abs(b))}`;
+  let inner;
+  if (m===0) inner = `y = ${formatNum(b)}`;
+  else {
+    let mPart = m===1?'<i>x</i>':(m===-1?'-<i>x</i>':`${formatNum(m)}<i>x</i>`);
+    if (b===0) inner = `y = ${mPart}`;
+    else inner = `y = ${mPart} ${b>0?'+':'-'} ${formatNum(Math.abs(b))}`;
+  }
+  return `<span class="mathexpr">${inner}</span>`;
 }
-function fmtPoint(x,y){ return `(${formatNum(x)}, ${formatNum(y)})`; }
+function fmtPoint(x,y){ return `<span class="mathexpr">(${formatNum(x)}, ${formatNum(y)})</span>`; }
 function shoelace(pts){
   let s=0;
   for (let i=0;i<pts.length;i++){ const [x1,y1]=pts[i]; const [x2,y2]=pts[(i+1)%pts.length]; s+=x1*y2-x2*y1; }
@@ -349,10 +358,10 @@ function renderScene(container, scene, size=260){
   for (const p of points){
     if (!p.label) continue;
     const [px,py] = toPx(p.x,p.y);
-    svg.appendChild(el('circle',{cx:px,cy:py,r:2.4,fill:'#1A1A1A'}));
+    svg.appendChild(el('circle',{cx:px,cy:py,r:2.9,fill:'#1A1A1A'}));
     placedBoxes.push({x0:px-3,x1:px+3,y0:py-3,y1:py+3});
     const order = posToCandOrder(p.pos);
-    const labelW = 7*(p.label.length)+4, labelH = 11;
+    const labelW = 8*(p.label.length)+4, labelH = 13;
     let chosen = CAND[order[0]];
     for (const idx of order){
       const [dx,dy] = CAND[idx];
@@ -361,7 +370,7 @@ function renderScene(container, scene, size=260){
       if (idx===order[order.length-1]) placedBoxes.push(bx);
     }
     const [dx,dy] = chosen;
-    const t = el('text',{x:px+dx,y:py+dy,'font-size':12,fill:'#1A1A1A','font-style':'italic'});
+    const t = el('text',{x:px+dx,y:py+dy,'font-size':14,fill:'#1A1A1A','font-style':'italic'});
     t.textContent = p.label;
     svg.appendChild(t);
   }
@@ -375,9 +384,9 @@ function curveYatX(c, x){
   return null;
 }
 function describeCurveName(c){
-  if (c.type==='parabola') return `関数${c.a===1?'y=x²':`y=${formatNum(c.a)}x²`}`;
-  if (c.type==='inverse') return `関数y=${c.k}/x`;
-  if (c.type==='vline') return `直線x=${formatNum(c.x)}`;
+  if (c.type==='parabola') return `関数<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`;
+  if (c.type==='inverse') return `関数<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`;
+  if (c.type==='vline') return `直線<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`;
   return `直線${fmtLinear(c.m,c.b)}`;
 }
 
@@ -729,8 +738,8 @@ function qIntersectionGeneral(scene){
     const sols = allSols.filter(([x,y])=>isNice(x,4)&&isNice(y,4)&&Math.abs(x)<20&&Math.abs(y)<60&&(Math.abs(x)>0.4||Math.abs(y)>0.4));
     if (sols.length===0) continue;
     const [x0,y0] = choice(sols);
-    const nameOf = c => c.type==='parabola'?`放物線${c.a===1?'y=x²':`y=${formatNum(c.a)}x²`}`:c.type==='vline'?`直線x=${formatNum(c.x)}`:c.type==='inverse'?`反比例y=${c.k}/x`:`直線${fmtLinear(c.m,c.b)}`;
-    const eqOf = c => c.type==='parabola'?(c.a===1?'x²':`${formatNum(c.a)}x²`):c.type==='inverse'?`${c.k}/x`:c.type==='vline'?null:fmtLinear(c.m,c.b).replace('y = ','');
+    const nameOf = c => c.type==='parabola'?`放物線<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`:c.type==='vline'?`直線<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`:c.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`:`直線${fmtLinear(c.m,c.b)}`;
+    const eqOf = c => c.type==='parabola'?(c.a===1?'<i>x</i>²':`${formatNum(c.a)}<i>x</i>²`):c.type==='inverse'?`${formatNum(c.k)}/<i>x</i>`:c.type==='vline'?null:fmtLinear(c.m,c.b).replace('y = ','');
     const needsQualifier = allSols.length >= 2;
     const qualifier = needsQualifier ? `のうち、x座標が${x0<0?'負':'正'}である点を` : 'である点を';
 
@@ -849,8 +858,8 @@ function qMovingArea(scene){
       domainText = `点Pのx座標が${t>other?`${formatNum(other)}より大きい数`:`${formatNum(other)}より小さい数`}であるとき、`;
     }
 
-    const hostName = host.type==='parabola'?`放物線${host.a===1?'y=x²':`y=${formatNum(host.a)}x²`}`:host.type==='inverse'?`反比例y=${host.k}/x`:`直線${fmtLinear(host.m,host.b)}`;
-    const hostEqDesc = host.type==='parabola'?`P(t, ${host.a===1?'t²':`${formatNum(host.a)}t²`})`:host.type==='inverse'?`P(t, ${host.k}/t)`:`P(t, ${fmtLinear(host.m,host.b).replace('y = ','')})`;
+    const hostName = host.type==='parabola'?`放物線<span class="mathexpr">${host.a===1?'y=<i>x</i>²':`y=${formatNum(host.a)}<i>x</i>²`}</span>`:host.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(host.k)}/<i>x</i></span>`:`直線${fmtLinear(host.m,host.b)}`;
+    const hostEqDesc = `<span class="mathexpr">P(<i>t</i>, ${host.type==='parabola'?(host.a===1?'<i>t</i>²':`${formatNum(host.a)}<i>t</i>²`):host.type==='inverse'?`${formatNum(host.k)}/<i>t</i>`:fmtLinear(host.m,host.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>')})</span>`;
     return {
       kind:'movArea', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label,F2p.label], hostIdx: scene.curves.indexOf(host),
       prompt: `${hostName}上に動く点Pをとる。${domainText}△P${F1p.label}${F2p.label}の面積が${formatNum(targetArea,12)}となるとき、点Pの座標を求めなさい。`,
@@ -898,11 +907,12 @@ function qMovingLength(scene){
     }
 
     const lenStr = fmtSqrt(D);
+    const tExpr = fmtLinear(host.m,host.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>');
     return {
       kind:'movLength', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label], hostIdx: scene.curves.indexOf(host),
       prompt: `直線${fmtLinear(host.m,host.b)}上に動く点Pをとる。${domainText}線分P${F1p.label}の長さが${lenStr}となるとき、点Pの座標を求めなさい。`,
       final: `P${fmtPoint(t,Py)}`,
-      steps: `点Pのx座標をtとおくと、P(t, ${fmtLinear(host.m,host.b).replace('y = ','')})と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}との距離の2乗は、三平方の定理(2点間の距離の公式)から\nP${F1p.label}²=(t−(${formatNum(F1p.x)}))²+(${fmtLinear(host.m,host.b).replace('y = ','')}−(${formatNum(F1p.y)}))²\nと表せる。線分P${F1p.label}の長さが${lenStr}なので、この式が${lenStr}の2乗、つまり${D}に等しいとして方程式を解くと、t=${formatNum(t)}(条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
+      steps: `点Pのx座標をtとおくと、<span class="mathexpr">P(<i>t</i>, ${tExpr})</span>と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}との距離の2乗は、三平方の定理(2点間の距離の公式)から\n<span class="mathexpr">P${F1p.label}²=(<i>t</i>−(${formatNum(F1p.x)}))²+(${tExpr}−(${formatNum(F1p.y)}))²</span>\nと表せる。線分P${F1p.label}の長さが${lenStr}なので、この式が${lenStr}の2乗、つまり${formatNum(D)}に等しいとして方程式を解くと、<span class="mathexpr"><i>t</i>=${formatNum(t)}</span>(条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
     };
   }
   return null;
@@ -1155,10 +1165,10 @@ function renderPrintProblem(problem){
   `;
   requestAnimationFrame(()=>{
     const h1 = document.getElementById(fig1Id);
-    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 220);
+    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 280);
     if (hasExtra){
       const h2 = document.getElementById(fig2Id);
-      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 220);
+      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 280);
     }
   });
   return box;
