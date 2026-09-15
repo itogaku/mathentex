@@ -116,6 +116,7 @@
 
   footer.note{ margin-top: 28px; font-size: 12px; color: var(--sub-ink); border-top: 1px solid var(--rule); padding-top: 14px; }
 
+  @page{ size: portrait; }
   @media print{
     @page{ size: portrait; }
     body{ background:#fff; }
@@ -196,6 +197,7 @@
     <div class="config-panel no-print" id="geomConfigPanel1">
     <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeTriangle" checked> 三角形</label></div>
     <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeQuad" checked> 四角形</label></div>
+    <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeCombo"> 組み合わせ(三角形+四角形など)</label></div>
   </div>
     <div class="config-panel no-print" id="geomConfigPanel2">
     <div class="config-field checkbox-field"><label><input type="checkbox" id="lineAltitude"> 垂線</label></div>
@@ -211,16 +213,13 @@
   </div>
 
   <footer class="note no-print" id="funcFooter">出題される可能性がある内容: 変域 / 2点を通る直線の式 / 交点 / 三角形・四角形の面積 / 三角形の面積を2等分する直線の式 / 面積や線分の長さの条件を満たす動点の座標。</footer>
-  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似 / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
+  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似 / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化 / 組み合わせ→直角三角形+正方形の複合図形。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
 
   <div id="printArea"></div>
 </div>
 
 <script>
 
-/* ============================================================
-   関数エンジン(IIFEでスコープを分離)
-   ============================================================ */
 const FuncEngine = (function(){
 
 /* ============ ユーティリティ ============ */
@@ -1248,9 +1247,6 @@ function buildPrintSheet(){
   return { build: buildPrintSheet };
 })();
 
-/* ============================================================
-   図形エンジン(IIFEでスコープを分離)
-   ============================================================ */
 const GeomEngine = (function(){
 
 /* ============ ユーティリティ ============ */
@@ -1274,6 +1270,32 @@ function formatNum(x, maxDenom=40){
 }
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function weightedPickOne(items){
+  const total = items.reduce((s,it)=>s+it.w,0);
+  let r = Math.random()*total;
+  for (const it of items){ r -= it.w; if (r<=0) return it; }
+  return items[items.length-1];
+}
+function pickFromMenu(menu, count, proofPriority){
+  const pool = menu.slice();
+  const chosen = [];
+  if (proofPriority){
+    const proofItems = pool.filter(it=>it.q.type==='proof');
+    if (proofItems.length){
+      const picked = weightedPickOne(proofItems);
+      chosen.push(picked.q);
+      pool.splice(pool.indexOf(picked),1);
+    }
+  }
+  while (chosen.length<count && pool.length){
+    const picked = weightedPickOne(pool);
+    chosen.push(picked.q);
+    pool.splice(pool.indexOf(picked),1);
+  }
+  // 出題順をシャッフル
+  for (let i=chosen.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [chosen[i],chosen[j]]=[chosen[j],chosen[i]]; }
+  return chosen;
+}
 function shoelace(pts){
   let s=0;
   for (let i=0;i<pts.length;i++){ const [x1,y1]=pts[i]; const [x2,y2]=pts[(i+1)%pts.length]; s+=x1*y2-x2*y1; }
@@ -1348,49 +1370,54 @@ const TRIPLES = [[3,4,5],[6,8,10],[5,12,13],[8,15,17],[7,24,25],[9,12,15],[12,16
 function generatePattern1(){
   const [a,b,c] = choice(TRIPLES);
   const AD = b*b/c, BD = a*a/c, CD = a*b/c;
+  const areaABC = a*b/2, areaACD = AD*CD/2, areaBCD = BD*CD/2;
 
-  // 描画用座標: A=(0,0), B=(c,0), D=(AD,0), C=(AD,CD)
   const A=[0,0], B=[c,0], D=[AD,0], C=[AD,CD];
-
   const setup = `<span class="mathexpr">∠ACB=90°</span>の直角三角形ABCがある。頂点Cから辺ABに垂線をひき、ABとの交点をDとする。`;
-
   const scene = {
     points: [
-      {x:A[0],y:A[1],label:'A',pos:'below'},
-      {x:B[0],y:B[1],label:'B',pos:'below'},
-      {x:C[0],y:C[1],label:'C',pos:'above'},
-      {x:D[0],y:D[1],label:'D',pos:'below'},
+      {x:A[0],y:A[1],label:'A',pos:'below'}, {x:B[0],y:B[1],label:'B',pos:'below'},
+      {x:C[0],y:C[1],label:'C',pos:'above'}, {x:D[0],y:D[1],label:'D',pos:'below'},
     ],
     segments: [[0,1,'solid'],[1,2,'solid'],[2,0,'solid'],[2,3,'dashed']],
     rightAngleMarks: [[2,0,1],[3,0,2]]
   };
 
-  const askAD = Math.random()<0.5;
-  const lenQAnswer = askAD ? AD : BD;
-  const lenQLabel = askAD ? 'AD' : 'BD';
+  const menu = [];
+  menu.push({ w:3, q:{ style:'proof', type:'proof',
+    prompt: `△ABC∽△ACDであることを証明しなさい。`, final: `(証明は解説を参照)`,
+    steps: `[証明]\n△ABCと△ACDにおいて、\n仮定より ∠ACB=∠ADC=90°…①\n共通な角だから ∠BAC=∠CAD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ACD` }});
+  menu.push({ w:3, q:{ style:'proof', type:'proof',
+    prompt: `△ABC∽△CBDであることを証明しなさい。`, final: `(証明は解説を参照)`,
+    steps: `[証明]\n△ABCと△CBDにおいて、\n仮定より ∠ACB=∠CDB=90°…①\n共通な角だから ∠ABC=∠CBD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△CBD` }});
+  menu.push({ w:2, q:{ style:'plain', type:'text',
+    prompt: `線分ADの長さを求めなさい。`, final: formatNum(AD),
+    steps: `△ABC∽△ACDより、AD:AC=AC:AB。よってAD=<span class="mathexpr">AC²÷AB</span>=${formatNum(b)}²÷${formatNum(c)}=${formatNum(AD)}。` }});
+  menu.push({ w:2, q:{ style:'plain', type:'text',
+    prompt: `線分BDの長さを求めなさい。`, final: formatNum(BD),
+    steps: `△ABC∽△CBDより、BD:BC=BC:AB。よってBD=<span class="mathexpr">BC²÷AB</span>=${formatNum(a)}²÷${formatNum(c)}=${formatNum(BD)}。` }});
+  menu.push({ w:2, q:{ style:'plain', type:'text',
+    prompt: `線分CDの長さを求めなさい。`, final: formatNum(CD),
+    steps: `△ABC∽△CBDより、CD:BC=AC:AB。よってCD=<span class="mathexpr">BC×AC÷AB</span>=${formatNum(a)}×${formatNum(b)}÷${formatNum(c)}=${formatNum(CD)}。` }});
+  menu.push({ w:1, q:{ style:'plain', type:'text',
+    prompt: `△ACDの面積を求めなさい。`, final: formatNum(areaACD),
+    steps: `△ACDは∠ADC=90°の直角三角形で、AD=${formatNum(AD)}、CD=${formatNum(CD)}だから\n面積=<span class="mathexpr">AD×CD÷2</span>=${formatNum(areaACD)}。` }});
+  menu.push({ w:1, q:{ style:'plain', type:'text',
+    prompt: `△BCDの面積を求めなさい。`, final: formatNum(areaBCD),
+    steps: `△BCDは∠BDC=90°の直角三角形で、BD=${formatNum(BD)}、CD=${formatNum(CD)}だから\n面積=<span class="mathexpr">BD×CD÷2</span>=${formatNum(areaBCD)}。` }});
+  menu.push({ w:2, q:{ style:'plain', type:'text',
+    prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ACDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+    final: `<span class="mathexpr"><i>x</i>°</span>`,
+    steps: `△ABC∽△ACDであり、∠ABCと∠ACDは対応する角だから、∠ACD=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` }});
+  menu.push({ w:2, q:{ style:'plain', type:'text',
+    prompt: `<span class="mathexpr">∠BAC=<i>x</i>°</span>とするとき、∠BCDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+    final: `<span class="mathexpr"><i>x</i>°</span>`,
+    steps: `△ABC∽△CBDであり、∠BACと∠BCDは対応する角だから、∠BCD=∠BAC=<span class="mathexpr"><i>x</i>°</span>。` }});
 
-  return {
-    unitLabel: '直角三角形+相似', scene,
+  const questions = pickFromMenu(menu, 4, /*proofPriority=*/true);
+  return { unitLabel: '直角三角形+相似', scene,
     setup: `${setup}<span class="mathexpr">BC=${formatNum(a)}, CA=${formatNum(b)}, AB=${formatNum(c)}</span>とする。`,
-    questions: [
-      { style:'plain', type:'text',
-        prompt: `線分${lenQLabel}の長さを求めなさい。`,
-        final: formatNum(lenQAnswer),
-        steps: `△ABCと△${askAD?'ACD':'CBD'}において、共通(または対頂)な角と直角より∠A(∠B)が共通、∠ADC=∠ACB=90°だから2組の角がそれぞれ等しく相似。\n相似比から ${askAD? 'AD:AC=AC:AB':'BD:BC=BC:AB'} より、${lenQLabel}=<span class="mathexpr">${formatNum(b)}²÷${formatNum(c)}</span>=${formatNum(lenQAnswer)}(実際は${askAD?'AC²÷AB':'BC²÷AB'})。` },
-      { style:'proof', type:'proof',
-        prompt: `△ABC∽△ACDであることを証明しなさい。`,
-        final: `(証明は解説を参照)`,
-        steps: `[証明]\n△ABCと△ACDにおいて、\n仮定より ∠ACB=∠ADC=90°…①\n共通な角だから ∠BAC=∠CAD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ACD` },
-      { style:'plain', type:'text',
-        prompt: `線分CDの長さを求めなさい。`,
-        final: formatNum(CD),
-        steps: `△ABC∽△CBDより、CD:BC=AC:AB。よってCD=<span class="mathexpr">BC×AC÷AB</span>=${formatNum(a)}×${formatNum(b)}÷${formatNum(c)}=${formatNum(CD)}。` },
-      { style:'plain', type:'text',
-        prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ACDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-        final: `<span class="mathexpr"><i>x</i>°</span>`,
-        steps: `△ABC∽△ACDであり、∠ABCと∠ACDは対応する角だから、∠ACD=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` },
-    ]
-  };
+    questions };
 }
 
 /* ============ パターン2: 中点連結の一般化(対角の頂点から同じ比) ============ */
@@ -1447,33 +1474,38 @@ function generatePattern2(){
       rightAngleMarks: []
     };
 
+    const menu = [];
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分PSの長さを求めなさい。`, final: formatNum(PS),
+      steps: `△ABDにおいて、AP:AB=AS:AD=${k}:${n}だから、PS∥BDであり、PS:BD=${k}:${n}。\nよってPS=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分QRの長さを求めなさい。`, final: formatNum(PS),
+      steps: `△CBDにおいて、CQ:CB=CR:CD=${k}:${n}だから、QR∥BDであり、QR:BD=${k}:${n}。\nよってQR=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` }});
+    menu.push({ w:3, q:{ style:'proof', type:'proof',
+      prompt: `四角形PQRSが平行四辺形であることを証明しなさい。`, final: `(証明は解説を参照)`,
+      steps: `[証明]\n△ABDにおいて、AP:PB=AS:SD=${k}:${n-k}だから、PS∥BD、PS=BD×${k}/${n}…①\n△CBDにおいて、CQ:QB=CR:RD=${k}:${n-k}だから、QR∥BD、QR=BD×${k}/${n}…②\n①、②より、PS∥QR、PS=QR\nよって1組の対辺が平行でその長さが等しいので、四角形PQRSは平行四辺形である。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `四角形ABCDの面積が${formatNum(area)}のとき、四角形PQRSの面積を求めなさい。`, final: formatNum(pqrsArea),
+      steps: `PS:BD=${k}:${n}なので、四角形PQRSと四角形ABCDの面積比は<span class="mathexpr">2×(${k}/${n})×(${n-k}/${n})</span>=${formatNum(ratio)}倍になる。\nよって面積は${formatNum(area)}×${formatNum(ratio)}=${formatNum(pqrsArea)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠PQRの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+      steps: `四角形PQRSは平行四辺形であり、平行四辺形のとなり合う角の和は180°だから、∠PQR=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠QRSの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr"><i>x</i>°</span>`,
+      steps: `四角形PQRSは平行四辺形であり、平行四辺形の対角は等しいから、∠QRS=∠SPQ=<span class="mathexpr"><i>x</i>°</span>。` }});
+
     return {
       unitLabel: '中点連結の一般化', scene,
       setup: `四角形ABCDがあり、面積は${formatNum(area)}である。辺AB、AD上にそれぞれAP:PB=AS:SD=<span class="mathexpr">${k}:${n-k}</span>となる点P、Sを、辺CB、CD上にそれぞれCQ:QB=CR:RD=<span class="mathexpr">${k}:${n-k}</span>となる点Q、Rをとる。`,
-      questions: [
-        { style:'plain', type:'text',
-          prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分PSの長さを求めなさい。`,
-          final: formatNum(PS),
-          steps: `△ABDにおいて、AP:AB=AS:AD=${k}:${n}だから、PS∥BDであり、PS:BD=${k}:${n}。\nよってPS=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` },
-        { style:'proof', type:'proof',
-          prompt: `四角形PQRSが平行四辺形であることを証明しなさい。`,
-          final: `(証明は解説を参照)`,
-          steps: `[証明]\n△ABDにおいて、AP:PB=AS:SD=${k}:${n-k}だから、PS∥BD、PS=BD×${k}/${n}…①\n△CBDにおいて、CQ:QB=CR:RD=${k}:${n-k}だから、QR∥BD、QR=BD×${k}/${n}…②\n①、②より、PS∥QR、PS=QR\nよって1組の対辺が平行でその長さが等しいので、四角形PQRSは平行四辺形である。` },
-        { style:'plain', type:'text',
-          prompt: `四角形PQRSの面積を求めなさい。`,
-          final: formatNum(pqrsArea),
-          steps: `PS:BD=${k}:${n}なので、四角形PQRSと四角形ABCDの面積比は<span class="mathexpr">2×(${k}/${n})×(${n-k}/${n})</span>=${formatNum(ratio)}倍になる。\nよって面積は${formatNum(area)}×${formatNum(ratio)}=${formatNum(pqrsArea)}。` },
-        { style:'plain', type:'text',
-          prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠PQRの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-          steps: `四角形PQRSは平行四辺形であり、平行四辺形のとなり合う角の和は180°だから、∠PQR=<span class="mathexpr">180°-<i>x</i>°</span>。` },
-      ]
+      questions: pickFromMenu(menu, 4, true)
     };
   }
   return null;
 }
 
-/* ============ パターン3: 長方形+対角線交差の相似 ============ */
+/* ============ パターン3: 台形+対角線交差の相似 ============ */
 function lineIntersect(P1,P2,P3,P4){
   const [x1,y1]=P1,[x2,y2]=P2,[x3,y3]=P3,[x4,y4]=P4;
   const denom = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
@@ -1508,27 +1540,33 @@ function generatePattern3(){
       rightAngleMarks: []
     };
 
+    const areaFDE = shoelace([F,D,E]);
+    const menu = [];
+    menu.push({ w:3, q:{ style:'proof', type:'proof',
+      prompt: `△FBC∽△FDEであることを証明しなさい。`, final: `(証明は解説を参照)`,
+      steps: `[証明]\n△FBCと△FDEにおいて、\n対頂角は等しいから ∠BFC=∠DFE…①\nAD∥BCであり、EはAD上の点だからBC∥DEとなり、平行線の錯角は等しいから\n∠FBC=∠FDE…②\n①、②より、2組の角がそれぞれ等しいので\n△FBC∽△FDE` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `線分BFと線分FDの長さの比を、最も簡単な整数の比で表しなさい。`, final: `BF:FD = <span class="mathexpr">${ratioNum}:${ratioDen}</span>`,
+      steps: `△FBC∽△FDEより、BF:FD=BC:DE。BC=AD=<span class="mathexpr">AE+ED</span>=${formatNum(topLen)}、DE=${formatNum(q)}だから\nBF:FD=${formatNum(topLen)}:${formatNum(q)}=${ratioNum}:${ratioDen}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FBCの面積を求めなさい。`, final: formatNum(areaFBC),
+      steps: `△DBCの面積は、台形ABCDから△ABDを除いた部分であり、底辺BCが共通で高さが台形の高さと等しいことから、台形の面積×BC/(AD+BC)で求められる。\nBF:FD=${ratioNum}:${ratioDen}より、△FBCの面積は△DBCの面積の${ratioNum}/${ratioNum+ratioDen}倍。\n計算すると△FBCの面積は${formatNum(areaFBC)}。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FDEの面積を求めなさい。`, final: formatNum(areaFDE),
+      steps: `△FDEと△FBCの相似比はDE:BC=${ratioDen}:${ratioNum}なので、面積比は<span class="mathexpr">${ratioDen}²:${ratioNum}²</span>。\n△FBCの面積は${formatNum(areaFBC)}だから、△FDEの面積はその<span class="mathexpr">(${ratioDen}/${ratioNum})²</span>倍の${formatNum(areaFDE)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠DBC=<i>x</i>°</span>とするとき、∠BDEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr"><i>x</i>°</span>`,
+      steps: `AD∥BCであり、EはAD上の点だからBC∥DEとなる。線分BDが2直線BC,DEに交わる錯角だから、∠BDE=∠DBC=<span class="mathexpr"><i>x</i>°</span>。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `△FBCと△FDEの面積比を、最も簡単な整数の比で表しなさい。`,
+      final: `△FBC:△FDE = <span class="mathexpr">${ratioNum*ratioNum}:${ratioDen*ratioDen}</span>`,
+      steps: `△FBC∽△FDEで相似比がBC:DE=${ratioNum}:${ratioDen}だから、面積比はその2乗で<span class="mathexpr">${ratioNum}²:${ratioDen}²</span>=${ratioNum*ratioNum}:${ratioDen*ratioDen}。` }});
+
     return {
       unitLabel:'台形+対角線交差', scene,
       setup: `四角形ABCDは<span class="mathexpr">AD∥BC</span>の台形であり、点Eは辺AD上にある。線分BDと線分CEの交点をFとする。<span class="mathexpr">AE=${formatNum(p0)}, ED=${formatNum(q)}</span>とする。`,
-      questions: [
-        { style:'proof', type:'proof',
-          prompt: `△FBC∽△FDEであることを証明しなさい。`,
-          final: `(証明は解説を参照)`,
-          steps: `[証明]\n△FBCと△FDEにおいて、\n対頂角は等しいから ∠BFC=∠DFE…①\nAD∥BCであり、EはAD上の点だからBC∥DEとなり、平行線の錯角は等しいから\n∠FBC=∠FDE…②\n①、②より、2組の角がそれぞれ等しいので\n△FBC∽△FDE` },
-        { style:'plain', type:'text',
-          prompt: `線分BFと線分FDの長さの比を、最も簡単な整数の比で表しなさい。`,
-          final: `BF:FD = <span class="mathexpr">${ratioNum}:${ratioDen}</span>`,
-          steps: `△FBC∽△FDEより、BF:FD=BC:DE。BC=AD=<span class="mathexpr">AE+ED</span>=${formatNum(topLen)}、DE=${formatNum(q)}だから\nBF:FD=${formatNum(topLen)}:${formatNum(q)}=${ratioNum}:${ratioDen}。` },
-        { style:'plain', type:'text',
-          prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FBCの面積を求めなさい。`,
-          final: formatNum(areaFBC),
-          steps: `△DBCの面積は、台形ABCDから△ABDを除いた部分であり、底辺BCが共通で高さが台形の高さと等しいことから、台形の面積×BC/(AD+BC)で求められる。\nBF:FD=${ratioNum}:${ratioDen}より、△FBCの面積は△DBCの面積の${ratioNum}/${ratioNum+ratioDen}倍。\n計算すると△FBCの面積は${formatNum(areaFBC)}。` },
-        { style:'plain', type:'text',
-          prompt: `<span class="mathexpr">∠DBC=<i>x</i>°</span>とするとき、∠BDEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-          final: `<span class="mathexpr"><i>x</i>°</span>`,
-          steps: `AD∥BCであり、EはAD上の点だからBC∥DEとなる。線分BDが2直線BC,DEに交わる錯角だから、∠BDE=∠DBC=<span class="mathexpr"><i>x</i>°</span>。` },
-      ]
+      questions: pickFromMenu(menu, 4, true)
     };
   }
   return null;
@@ -1561,6 +1599,9 @@ function generatePattern5(){
     if (!isNice(BD,60) || !isNice(DE,60) || !isNice(AB,60) || !isNice(BC,60)) continue;
     if (BD<0.3 || BD>40 || DE<0.3 || DE>60) continue;
 
+    const AE = t*AC, CE = (t-1)*AC;
+    const acNice = isNice(AC,60) && isNice(AE,60) && isNice(CE,60);
+
     const scene = {
       points: [
         {x:A[0],y:A[1],label:'A',pos:'above'}, {x:B[0],y:B[1],label:'B',pos:'left'},
@@ -1571,23 +1612,79 @@ function generatePattern5(){
       rightAngleMarks: []
     };
 
+    const menu = [];
+    menu.push({ w:3, q:{ style:'proof', type:'proof',
+      prompt: `△ABC∽△ADEであることを証明しなさい。`, final: `(証明は解説を参照)`,
+      steps: `[証明]\n△ABCと△ADEにおいて、\n共通な角だから ∠BAC=∠DAE…①\nBC∥DEであり、平行線の同位角は等しいから\n∠ABC=∠ADE…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ADE` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">AD:AB=${tn}:${td}</span>のとき、線分BDの長さを求めなさい。`, final: formatNum(BD),
+      steps: `AD:AB=${tn}:${td}だから、BD=AD-AB=<span class="mathexpr">AB×(${tn}-${td})/${td}</span>=${formatNum(AB)}×${tn-td}/${td}=${formatNum(BD)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `線分DEの長さを求めなさい。`, final: formatNum(DE),
+      steps: `△ABC∽△ADEより、DE:BC=AD:AB=${tn}:${td}。よってDE=<span class="mathexpr">BC×${tn}/${td}</span>=${formatNum(BC)}×${formatNum(t)}=${formatNum(DE)}。` }});
+    if (acNice){
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">AC=${formatNum(AC)}</span>のとき、線分AEの長さを求めなさい。`, final: formatNum(AE),
+      steps: `△ABC∽△ADEより、AE:AC=AD:AB=${tn}:${td}。よってAE=<span class="mathexpr">AC×${tn}/${td}</span>=${formatNum(AC)}×${formatNum(t)}=${formatNum(AE)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">AC=${formatNum(AC)}</span>のとき、線分CEの長さを求めなさい。`, final: formatNum(CE),
+      steps: `AE=<span class="mathexpr">AC×${tn}/${td}</span>=${formatNum(AE)}であり、CE=AE-AC=${formatNum(AE)}-${formatNum(AC)}=${formatNum(CE)}。` }});
+    }
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ADEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr"><i>x</i>°</span>`,
+      steps: `BC∥DEであり、平行線の同位角は等しいから、∠ADE=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` }});
+
     return {
       unitLabel:'三角形+延長線', scene,
       setup: `△ABCがある。辺ABをBの方向に延長した直線上に点Dを、辺ACをCの方向に延長した直線上に点Eを、<span class="mathexpr">BC∥DE</span>となるようにとる。<span class="mathexpr">AB=${formatNum(AB)}, BC=${formatNum(BC)}</span>とする。`,
-      questions: [
-        { style:'proof', type:'proof',
-          prompt: `△ABC∽△ADEであることを証明しなさい。`,
-          final: `(証明は解説を参照)`,
-          steps: `[証明]\n△ABCと△ADEにおいて、\n共通な角だから ∠BAC=∠DAE…①\nBC∥DEであり、平行線の同位角は等しいから\n∠ABC=∠ADE…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ADE` },
-        { style:'plain', type:'text',
-          prompt: `<span class="mathexpr">AD:AB=${tn}:${td}</span>のとき、線分BDの長さを求めなさい。`,
-          final: formatNum(BD),
-          steps: `AD:AB=${tn}:${td}だから、BD=AD-AB=<span class="mathexpr">AB×(${tn}-${td})/${td}</span>=${formatNum(AB)}×${tn-td}/${td}=${formatNum(BD)}。` },
-        { style:'plain', type:'text',
-          prompt: `線分DEの長さを求めなさい。`,
-          final: formatNum(DE),
-          steps: `△ABC∽△ADEより、DE:BC=AD:AB=${tn}:${td}。よってDE=<span class="mathexpr">BC×${tn}/${td}</span>=${formatNum(BC)}×${formatNum(t)}=${formatNum(DE)}。` },
-      ]
+      questions: pickFromMenu(menu, 3, true)
+    };
+  }
+  return null;
+}
+
+/* ============ パターン7: 直角三角形+正方形(複合図形) ============ */
+function generatePattern7(){
+  for (let attempt=0; attempt<150; attempt++){
+    const a = randInt(3,12), b = randInt(3,12);
+    const C=[0,0], B=[a,0], A=[0,b], D=[-b,0], E=[-b,b];
+    const F = lineIntersect(A,C,B,E);
+    if (!F) continue;
+    const AF = b*b/(a+b);
+    const CF = b - AF;
+    const BE = dist(B,E);
+    if (!isNice(AF,60) || !isNice(CF,60)) continue;
+
+    const scene = {
+      points: [
+        {x:A[0],y:A[1],label:'A',pos:'above'}, {x:B[0],y:B[1],label:'B',pos:'below'},
+        {x:C[0],y:C[1],label:'C',pos:'below'}, {x:D[0],y:D[1],label:'D',pos:'below'},
+        {x:E[0],y:E[1],label:'E',pos:'above'}, {x:F[0],y:F[1],label:'F',pos:'right'},
+      ],
+      segments: [[0,1,'solid'],[1,2,'solid'],[2,0,'solid'],[0,4,'solid'],[4,3,'solid'],[3,2,'solid'],[1,4,'dashed']],
+      rightAngleMarks: [[2,1,0],[0,4,2]]
+    };
+
+    const menu = [];
+    menu.push({ w:3, q:{ style:'proof', type:'proof',
+      prompt: `△AFEと△DEBが相似になることを証明しなさい。`, final: `(証明は解説を参照)`,
+      steps: `[証明]\n△AFEと△DEBにおいて、\n四角形ACDEは正方形だから ∠EAF=∠BDE=90°…①\nAE∥CB(ともに直線BCに平行)であり、平行線の錯角は等しいから\n∠AEF(=∠AEB)=∠DBE…②\n①、②より、2組の角がそれぞれ等しいので\n△AFE∽△DEB` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">AC=${formatNum(b)}, CB=${formatNum(a)}</span>のとき、線分AFの長さを求めなさい。`, final: formatNum(AF),
+      steps: `△AFE∽△DEBより、AF:DE=AE:DB。AE=DE=AC=${formatNum(b)}、DB=DC+CB=<span class="mathexpr">${formatNum(b)}+${formatNum(a)}</span>=${formatNum(a+b)}だから\nAF=<span class="mathexpr">AE²÷DB</span>=${formatNum(b)}²÷${formatNum(a+b)}=${formatNum(AF)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">AC=${formatNum(b)}, CB=${formatNum(a)}</span>のとき、線分CFの長さを求めなさい。`, final: formatNum(CF),
+      steps: `AF=<span class="mathexpr">AC²÷(AC+CB)</span>=${formatNum(b)}²÷${formatNum(a+b)}=${formatNum(AF)}であり、\nCF=AC-AF=${formatNum(b)}-${formatNum(AF)}=${formatNum(CF)}。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠AEB=<i>x</i>°</span>とするとき、∠DBEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr"><i>x</i>°</span>`,
+      steps: `AE∥CBであり、線分BEが2直線に交わる錯角だから、∠DBE=∠EBC=∠AEB=<span class="mathexpr"><i>x</i>°</span>。` }});
+
+    return {
+      unitLabel:'直角三角形+正方形', scene,
+      setup: `<span class="mathexpr">∠ACB=90°</span>の直角三角形ABCがあり、辺ACを1辺とする正方形ACDEを、頂点Bと反対側につくる。辺ACと線分BEとの交点をFとする。`,
+      questions: pickFromMenu(menu, 3, true)
     };
   }
   return null;
@@ -1612,23 +1709,30 @@ function generatePattern6(){
       rightAngleMarks: [[0,2,1],[1,3,4]]
     };
 
+    const areaDQC = legH*legW/2;
+    const menu = [];
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `線分DCの長さを求めなさい。`, final: formatNum(hyp),
+      steps: `四角形ABQDは長方形だから、DQ=AB=${formatNum(legH)}。\n直角三角形DQCにおいて、三平方の定理より\nDC²=DQ²+QC²=<span class="mathexpr">${formatNum(legH)}²+${formatNum(legW)}²</span>=${legH*legH+legW*legW}\nDC=${formatNum(hyp)}(DC>0)。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `台形ABCDの面積を求めなさい。`, final: formatNum(areaTrap),
+      steps: `台形の面積は<span class="mathexpr">(AD+BC)×AB÷2</span>で求められる。BC=AD+QC=<span class="mathexpr">${formatNum(adLen)}+${formatNum(legW)}</span>=${formatNum(adLen+legW)}だから\n面積=(${formatNum(adLen)}+${formatNum(adLen+legW)})×${formatNum(legH)}÷2=${formatNum(areaTrap)}。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `△DQCの面積を求めなさい。`, final: formatNum(areaDQC),
+      steps: `△DQCは∠DQC=90°の直角三角形で、DQ=AB=${formatNum(legH)}、QC=${formatNum(legW)}だから\n面積=<span class="mathexpr">DQ×QC÷2</span>=${formatNum(areaDQC)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠DCB=<i>x</i>°</span>とするとき、∠ADCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+      steps: `AD∥BCであり、DCが2直線に交わる同側内角の和は180°だから、∠ADC=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠DCQ=<i>x</i>°</span>とするとき、∠QDCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr">(90-<i>x</i>)°</span>`,
+      steps: `△DQCは∠DQC=90°の直角三角形だから、∠QDC+∠DCQ=90°。よって∠QDC=<span class="mathexpr">90°-<i>x</i>°</span>。` }});
+
     return {
       unitLabel:'台形+垂線', scene,
       setup: `四角形ABCDは<span class="mathexpr">AD∥BC, ∠ABC=90°</span>の台形である。頂点Dから辺BCに垂線をひき、BCとの交点をQとする。<span class="mathexpr">AB=${formatNum(legH)}, AD=${formatNum(adLen)}, QC=${formatNum(legW)}</span>とする。`,
-      questions: [
-        { style:'plain', type:'text',
-          prompt: `線分DCの長さを求めなさい。`,
-          final: formatNum(hyp),
-          steps: `四角形ABQDは長方形だから、DQ=AB=${formatNum(legH)}。\n直角三角形DQCにおいて、三平方の定理より\nDC²=DQ²+QC²=<span class="mathexpr">${formatNum(legH)}²+${formatNum(legW)}²</span>=${legH*legH+legW*legW}\nDC=${formatNum(hyp)}(DC>0)。` },
-        { style:'plain', type:'text',
-          prompt: `台形ABCDの面積を求めなさい。`,
-          final: formatNum(areaTrap),
-          steps: `台形の面積は<span class="mathexpr">(AD+BC)×AB÷2</span>で求められる。BC=AD+QC=<span class="mathexpr">${formatNum(adLen)}+${formatNum(legW)}</span>=${formatNum(adLen+legW)}だから\n面積=(${formatNum(adLen)}+${formatNum(adLen+legW)})×${formatNum(legH)}÷2=${formatNum(areaTrap)}。` },
-        { style:'plain', type:'text',
-          prompt: `<span class="mathexpr">∠DCB=<i>x</i>°</span>とするとき、∠ADCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-          steps: `AD∥BCであり、DCが2直線に交わる同側内角の和は180°だから、∠ADC=<span class="mathexpr">180°-<i>x</i>°</span>。` },
-      ]
+      questions: pickFromMenu(menu, 3, false)
     };
   }
   return null;
@@ -1658,23 +1762,26 @@ function generatePattern4(){
       rightAngleMarks: []
     };
 
+    const menu = [];
+    menu.push({ w:3, q:{ style:'proof', type:'proof',
+      prompt: `△BFEと△DFCが相似になることを証明しなさい。`, final: `(証明は解説を参照)`,
+      steps: `[証明]\n△BFEと△DFCにおいて、\n対頂角は等しいから ∠BFE=∠DFC…①\nBE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、平行線の錯角は等しいから\n∠FEB=∠FCD…②\n①、②より、2組の角がそれぞれ等しいので\n△BFE∽△DFC` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、線分BEの長さを求めなさい。`, final: formatNum(BE),
+      steps: `△BFE∽△DFCより、BE:DC=FB:FD。DC=AB=${formatNum(AB)}、FD=FB+BD=<span class="mathexpr">${numRs}+${denRs}</span>=${numRs+denRs}(比の値)だから\nBE=DC×FB/FD=${formatNum(AB)}×${numRs}/${numRs+denRs}=${formatNum(BE)}。` }});
+    menu.push({ w:2, q:{ style:'plain', type:'text',
+      prompt: `<span class="mathexpr">∠BEC=<i>x</i>°</span>とするとき、∠DCEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+      steps: `BE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、線分CEが2直線BE,DCに交わる同側内角の和は180°だから、∠DCE=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
+    menu.push({ w:1, q:{ style:'plain', type:'text',
+      prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、△BFEと△DFCの面積比を、最も簡単な整数の比で表しなさい。`,
+      final: `△BFE:△DFC = <span class="mathexpr">${numRs*numRs}:${(numRs+denRs)*(numRs+denRs)}</span>`,
+      steps: `△BFE∽△DFCで相似比がFB:FD=${numRs}:${numRs+denRs}だから、面積比はその2乗で<span class="mathexpr">${numRs}²:${numRs+denRs}²</span>=${numRs*numRs}:${(numRs+denRs)*(numRs+denRs)}。` }});
+
     return {
       unitLabel:'平行四辺形+延長線', scene,
       setup: `四角形ABCDは平行四辺形である。線分ABの延長上に点Eをとり、線分DB、CEをそれぞれ延長して交わった点をFとする。<span class="mathexpr">AB=${formatNum(AB)}</span>とする。`,
-      questions: [
-        { style:'proof', type:'proof',
-          prompt: `△BFEと△DFCが相似になることを証明しなさい。`,
-          final: `(証明は解説を参照)`,
-          steps: `[証明]\n△BFEと△DFCにおいて、\n対頂角は等しいから ∠BFE=∠DFC…①\nBE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、平行線の錯角は等しいから\n∠FEB=∠FCD…②\n①、②より、2組の角がそれぞれ等しいので\n△BFE∽△DFC` },
-        { style:'plain', type:'text',
-          prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、線分BEの長さを求めなさい。`,
-          final: formatNum(BE),
-          steps: `△BFE∽△DFCより、BE:DC=FB:FD。DC=AB=${formatNum(AB)}、FD=FB+BD=<span class="mathexpr">${numRs}+${denRs}</span>=${numRs+denRs}(比の値)だから\nBE=DC×FB/FD=${formatNum(AB)}×${numRs}/${numRs+denRs}=${formatNum(BE)}。` },
-        { style:'plain', type:'text',
-          prompt: `<span class="mathexpr">∠BEC=<i>x</i>°</span>とするとき、∠DCEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-          steps: `BE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、線分CEが2直線BE,DCに交わる同側内角の和は180°だから、∠DCE=<span class="mathexpr">180°-<i>x</i>°</span>。` },
-      ]
+      questions: pickFromMenu(menu, 3, true)
     };
   }
   return null;
@@ -1688,6 +1795,7 @@ const PATTERNS = [
   { key:'D', title:'平行四辺形+延長線の相似', requiredLines:['extend'], shape:'quad', gen: generatePattern4 },
   { key:'E', title:'三角形+延長線の相似', requiredLines:['extend'], shape:'triangle', gen: generatePattern5 },
   { key:'F', title:'台形+垂線(面積分解)', requiredLines:['altitude'], shape:'quad', gen: generatePattern6 },
+  { key:'G', title:'直角三角形+正方形(複合図形)', requiredLines:[], shape:'combo', gen: generatePattern7 },
 ];
 function getSelectedLines(){
   const lines = [];
@@ -1701,12 +1809,16 @@ function getSelectedShapes(){
   const shapes = [];
   if (document.getElementById('shapeTriangle').checked) shapes.push('triangle');
   if (document.getElementById('shapeQuad').checked) shapes.push('quad');
+  if (document.getElementById('shapeCombo') && document.getElementById('shapeCombo').checked) shapes.push('combo');
   return shapes;
 }
 function matchingPatterns(selectedLines, selectedShapes){
   const selSet = new Set(selectedLines);
   const shapeSet = new Set(selectedShapes);
-  return PATTERNS.filter(p => p.requiredLines.every(l => selSet.has(l)) && shapeSet.has(p.shape));
+  return PATTERNS.filter(p => {
+    if (p.shape==='combo') return shapeSet.has('combo');
+    return p.requiredLines.every(l => selSet.has(l)) && shapeSet.has(p.shape);
+  });
 }
 
 /* ============ 印刷レイアウト ============ */
@@ -1775,9 +1887,6 @@ function buildPrintSheet(){
   return { build: buildPrintSheet };
 })();
 
-/* ============================================================
-   タブ切り替え・共通ボタン制御
-   ============================================================ */
 let currentTab = 'func';
 function switchTab(tab){
   currentTab = tab;
