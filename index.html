@@ -213,7 +213,7 @@
   </div>
 
   <footer class="note no-print" id="funcFooter">出題される可能性がある内容: 変域 / 2点を通る直線の式 / 交点 / 三角形・四角形の面積 / 三角形の面積を2等分する直線の式 / 面積や線分の長さの条件を満たす動点の座標。</footer>
-  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似 / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化 / 組み合わせ→直角三角形+正方形の複合図形。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
+  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似(発展構成あり) / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化 / 組み合わせ→直角三角形+正方形の複合図形。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
 
   <div id="printArea"></div>
 </div>
@@ -1541,6 +1541,17 @@ function generatePattern3(){
     };
 
     const areaFDE = shoelace([F,D,E]);
+    // 発展構成: Eを通り線分BDに平行な直線をひき、辺ABとの交点をG(条件を満たすときだけ出題)
+    const bdDir = [D[0]-B[0], D[1]-B[1]];
+    const G = lineIntersect(E,[E[0]+bdDir[0],E[1]+bdDir[1]], A,B);
+    const stage2OK = G && G[0]>=Math.min(A[0],B[0])-1e-9 && G[0]<=Math.max(A[0],B[0])+1e-9;
+    let EG, areaGBFE;
+    if (stage2OK){
+      EG = dist(G,E);
+      areaGBFE = shoelace([G,B,F,E]);
+    }
+    const stage2Nice = stage2OK && isNice(EG,60) && isNice(areaGBFE,60) && areaGBFE>0.3;
+
     const menu = [];
     menu.push({ w:3, q:{ style:'proof', type:'proof',
       prompt: `△FBC∽△FDEであることを証明しなさい。`, final: `(証明は解説を参照)`,
@@ -1549,10 +1560,10 @@ function generatePattern3(){
       prompt: `線分BFと線分FDの長さの比を、最も簡単な整数の比で表しなさい。`, final: `BF:FD = <span class="mathexpr">${ratioNum}:${ratioDen}</span>`,
       steps: `△FBC∽△FDEより、BF:FD=BC:DE。BC=AD=<span class="mathexpr">AE+ED</span>=${formatNum(topLen)}、DE=${formatNum(q)}だから\nBF:FD=${formatNum(topLen)}:${formatNum(q)}=${ratioNum}:${ratioDen}。` }});
     menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FBCの面積を求めなさい。`, final: formatNum(areaFBC),
+      prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、△FBCの面積を求めなさい。`, final: formatNum(areaFBC),
       steps: `△DBCの面積は、台形ABCDから△ABDを除いた部分であり、底辺BCが共通で高さが台形の高さと等しいことから、台形の面積×BC/(AD+BC)で求められる。\nBF:FD=${ratioNum}:${ratioDen}より、△FBCの面積は△DBCの面積の${ratioNum}/${ratioNum+ratioDen}倍。\n計算すると△FBCの面積は${formatNum(areaFBC)}。` }});
     menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FDEの面積を求めなさい。`, final: formatNum(areaFDE),
+      prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、△FDEの面積を求めなさい。`, final: formatNum(areaFDE),
       steps: `△FDEと△FBCの相似比はDE:BC=${ratioDen}:${ratioNum}なので、面積比は<span class="mathexpr">${ratioDen}²:${ratioNum}²</span>。\n△FBCの面積は${formatNum(areaFBC)}だから、△FDEの面積はその<span class="mathexpr">(${ratioDen}/${ratioNum})²</span>倍の${formatNum(areaFDE)}。` }});
     menu.push({ w:2, q:{ style:'plain', type:'text',
       prompt: `<span class="mathexpr">∠DBC=<i>x</i>°</span>とするとき、∠BDEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
@@ -1562,6 +1573,16 @@ function generatePattern3(){
       prompt: `△FBCと△FDEの面積比を、最も簡単な整数の比で表しなさい。`,
       final: `△FBC:△FDE = <span class="mathexpr">${ratioNum*ratioNum}:${ratioDen*ratioDen}</span>`,
       steps: `△FBC∽△FDEで相似比がBC:DE=${ratioNum}:${ratioDen}だから、面積比はその2乗で<span class="mathexpr">${ratioNum}²:${ratioDen}²</span>=${ratioNum*ratioNum}:${ratioDen*ratioDen}。` }});
+    if (stage2Nice){
+      scene.points.push({x:G[0],y:G[1],label:'G',pos:'left'});
+      scene.segments.push([6,4,'solid']);
+      menu.push({ w:2, q:{ style:'plain', type:'text',
+        prompt: `点Eを通り線分BDに平行な直線をひき、辺ABとの交点をGとする。線分EGの長さを求めなさい。`, final: formatNum(EG),
+        steps: `EG∥DBであり、△AEGと△ADBにおいて、共通な角と平行線の同位角からEG:DB=AE:ADとなる。\nBD=${formatNum(dist(B,D))}、AE:AD=${formatNum(p0)}:${formatNum(topLen)}だから\nEG=<span class="mathexpr">BD×AE/AD</span>=${formatNum(dist(B,D))}×${formatNum(p0)}/${formatNum(topLen)}=${formatNum(EG)}。` }});
+      menu.push({ w:1, q:{ style:'plain', type:'text',
+        prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、四角形GBFEの面積を求めなさい。`, final: formatNum(areaGBFE),
+        steps: `四角形GBFEの面積は、台形ABCDの面積から周囲の余分な三角形の面積を引くことで求められる。\n計算すると、四角形GBFEの面積は${formatNum(areaGBFE)}。` }});
+    }
 
     return {
       unitLabel:'台形+対角線交差', scene,
