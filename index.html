@@ -100,11 +100,13 @@
   }
   .mathexpr i, .mathnum i{ font-style: italic; }
   .frac{
-    display:inline-flex; flex-direction:column; vertical-align:-0.55em;
+    display:inline-flex; flex-direction:column; vertical-align:middle;
     text-align:center; margin:0 1px; line-height:1; font-size:0.85em;
   }
   .frac .fnum{ display:block; border-bottom:1px solid currentColor; padding:0 2px 1px; }
   .frac .fden{ display:block; padding:1px 2px 0; }
+  .graph-legend{ margin-top:6px; font-size:11px; color: var(--ink); text-align:left; line-height:1.6; }
+  .graph-legend .legend-item{ display:inline-block; margin:0 10px 2px 0; white-space:nowrap; }
   .answer-line .blank{ display:inline-block; min-width: 140px; border-bottom: 1px solid var(--ink); margin-left:6px; }
   .work-space{ height: 90px; border-bottom: 1px dashed var(--rule); margin-top: 8px; }
 
@@ -116,7 +118,6 @@
 
   footer.note{ margin-top: 28px; font-size: 12px; color: var(--sub-ink); border-top: 1px solid var(--rule); padding-top: 14px; }
 
-  @page{ size: portrait; }
   @media print{
     @page{ size: portrait; }
     body{ background:#fff; }
@@ -157,15 +158,17 @@
         <option value="0">0</option>
         <option value="1" selected>1</option>
         <option value="2">2</option>
+        <option value="random">ランダム</option>
       </select>
     </div>
     <div class="config-field">
       <label for="numLine">一次関数(傾きのある直線)の数</label>
       <select id="numLine">
-        <option value="0" selected>0</option>
+        <option value="0">0</option>
         <option value="1">1</option>
-        <option value="2">2</option>
+        <option value="2" selected>2</option>
         <option value="3">3</option>
+        <option value="random">ランダム</option>
       </select>
     </div>
     <div class="config-field">
@@ -175,10 +178,16 @@
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
+        <option value="random">ランダム</option>
       </select>
     </div>
-    <div class="config-field checkbox-field">
-      <label><input type="checkbox" id="hasInverse"> 反比例を含む</label>
+    <div class="config-field">
+      <label for="hasInverse">反比例を含む</label>
+      <select id="hasInverse">
+        <option value="no" selected>しない</option>
+        <option value="yes">する</option>
+        <option value="random">ランダム</option>
+      </select>
     </div>
     <div class="config-field">
       <label for="numPoints">登場する点の数</label>
@@ -191,13 +200,36 @@
         <option value="6">6</option>
       </select>
     </div>
+    <div class="config-field">
+      <label for="difficulty">難易度</label>
+      <select id="difficulty">
+        <option value="easy" selected>簡単</option>
+        <option value="medium">普通</option>
+        <option value="hard">難しい</option>
+        <option value="random">ランダム</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label for="shapePref">面積の図形</label>
+      <select id="shapePref">
+        <option value="either" selected>指定なし</option>
+        <option value="triangle">三角形</option>
+        <option value="quad">四角形</option>
+        <option value="parallelogram">四角形(平行四辺形)</option>
+        <option value="rhombus">四角形(ひし形)</option>
+        <option value="random">ランダム(毎回いずれか1つに決定)</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label>&nbsp;</label>
+      <button type="button" class="secondary" id="allRandomBtn" style="padding:7px 14px; font-size:13px;">すべてランダムにする</button>
+    </div>
   </div>
   </div>
   <div id="geomConfigWrap" class="no-print" style="display:none;">
     <div class="config-panel no-print" id="geomConfigPanel1">
     <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeTriangle" checked> 三角形</label></div>
     <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeQuad" checked> 四角形</label></div>
-    <div class="config-field checkbox-field"><label><input type="checkbox" id="shapeCombo"> 組み合わせ(三角形+四角形など)</label></div>
   </div>
     <div class="config-panel no-print" id="geomConfigPanel2">
     <div class="config-field checkbox-field"><label><input type="checkbox" id="lineAltitude"> 垂線</label></div>
@@ -213,13 +245,16 @@
   </div>
 
   <footer class="note no-print" id="funcFooter">出題される可能性がある内容: 変域 / 2点を通る直線の式 / 交点 / 三角形・四角形の面積 / 三角形の面積を2等分する直線の式 / 面積や線分の長さの条件を満たす動点の座標。</footer>
-  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似(発展構成あり) / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化 / 組み合わせ→直角三角形+正方形の複合図形。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
+  <footer class="note no-print" id="geomFooter" style="display:none;">対応パターン: 垂線→直角三角形の相似・台形の面積分解 / 対角線→台形の対角線交差の相似 / 延長線→平行四辺形+延長線の相似・三角形+延長線の相似 / 比率点→中点連結の一般化。図形・補助線とも複数選ぶと、合致するパターンからランダムに選ばれます。</footer>
 
   <div id="printArea"></div>
 </div>
 
 <script>
 
+/* ============================================================
+   関数エンジン(IIFEでスコープを分離)
+   ============================================================ */
 const FuncEngine = (function(){
 
 /* ============ ユーティリティ ============ */
@@ -262,6 +297,7 @@ function collinear(p1,p2,p3){
 }
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function shuffleArr(arr){ const a=[...arr]; for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
 /* ============ SVG描画エンジン ============ */
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -297,14 +333,24 @@ function renderScene(container, scene, size=260){
   let xmax = Math.max(0, ...points.map(p=>p.x), ...vlineXs);
   let ymin = Math.min(0, ...points.map(p=>p.y));
   let ymax = Math.max(0, ...points.map(p=>p.y));
+  // 図に登場する点が少ない場面(点1つだけなど)では、点だけから範囲を決めると表示範囲が
+  // 極端に狭くなり、グラフが不自然に拡大されて見えてしまう。そのため、最低限の表示範囲を
+  // 確保する(0は既にxmin<=0<=xmax等に含まれているため、左右/上下に等分に広げても
+  // 原点が範囲外にはみ出すことはない)。
+  const MIN_RANGE = 6;
+  if (xmax-xmin < MIN_RANGE){ const extra=(MIN_RANGE-(xmax-xmin))/2; xmin-=extra; xmax+=extra; }
+  if (ymax-ymin < MIN_RANGE){ const extra=(MIN_RANGE-(ymax-ymin))/2; ymin-=extra; ymax+=extra; }
   const padX = Math.max((xmax-xmin)*0.12, 0.6);
   const padY = Math.max((ymax-ymin)*0.12, 0.6);
   xmin -= padX; xmax += padX; ymin -= padY; ymax += padY;
   const w = xmax-xmin, h = ymax-ymin;
-  const scaleX = (size-32)/w, scaleY = (size-32)/h;
-  const cx = size/2 - (xmin+xmax)/2*scaleX;
-  const cy = size/2 + (ymin+ymax)/2*scaleY;
-  function toPx(x,y){ return [cx+x*scaleX, cy-y*scaleY]; }
+  // x軸とy軸で同じ縮尺を使う(縦横で異なる縮尺にすると、正方形やひし形など実際の形が
+  // 歪んで表示されてしまうため)。縮尺は幅・高さのうち厳しい方に合わせ、余った方向は
+  // 中央に寄せて配置する。
+  const scale = Math.min((size-32)/w, (size-32)/h);
+  const cx = size/2 - (xmin+xmax)/2*scale;
+  const cy = size/2 + (ymin+ymax)/2*scale;
+  function toPx(x,y){ return [cx+x*scale, cy-y*scale]; }
 
   const svg = el('svg', {class:'graph', width:size, height:size, viewBox:`0 0 ${size} ${size}`});
   const [ax1,ay1] = toPx(xmin+padX*0.1,0), [ax2,ay2] = toPx(xmax-padX*0.1,0);
@@ -319,11 +365,49 @@ function renderScene(container, scene, size=260){
   originLabel.textContent = 'O';
   if (!points.some(p=>p.label==='O')) svg.appendChild(originLabel);
 
+  // ラベル(点・線)の重なりを避けるための共通の当たり判定
+  const placedBoxes = [];
+  function boxOverlaps(bx){
+    for (const b of placedBoxes){
+      if (bx.x0<b.x1 && bx.x1>b.x0 && bx.y0<b.y1 && bx.y1>b.y0) return true;
+    }
+    return false;
+  }
+  function placeCurveLabel(px, py, text, candidates){
+    const labelW = 6*text.length+6, labelH = 12;
+    for (const [dx,dy] of candidates){
+      const bx = {x0:px+dx, x1:px+dx+labelW, y0:py+dy-labelH, y1:py+dy+2};
+      if (!boxOverlaps(bx)){ placedBoxes.push(bx); return [dx,dy]; }
+    }
+    const [dx,dy] = candidates[0];
+    placedBoxes.push({x0:px+dx, x1:px+dx+labelW, y0:py+dy-labelH, y1:py+dy+2});
+    return [dx,dy];
+  }
+
+  // 直線(line・vline)は式そのものではなく丸数字で示し、実際の式は図の下の凡例に書く
+  let lineNumCounter = 0;
+  const lineLegend = [];
   for (const c of curves){
     if (c.type==='vline'){
       const [px1,py1] = toPx(c.x, ymin+padY*0.1);
       const [px2,py2] = toPx(c.x, ymax-padY*0.1);
       svg.appendChild(el('line',{x1:px1,y1:py1,x2:px2,y2:py2, stroke:'#1A1A1A','stroke-width':1.4}));
+      if (c.unknownParam){
+        const label = curveLabelText(c);
+        const [ldx,ldy] = placeCurveLabel(px1, py1, label, [[4,12],[4,-4],[-6*label.length-8,12]]);
+        const lt = el('text',{x:px1+ldx,y:py1+ldy,'font-size':10.5,fill:'#1A1A1A'});
+        lt.textContent = label;
+        svg.appendChild(lt);
+      } else {
+        lineNumCounter++;
+        const num = lineNumCounter;
+        lineLegend.push({num, html: lineEqHTML(c)});
+        const badge = circledNum(num);
+        const [ldx,ldy] = placeCurveLabel(px1, py1, badge, [[4,12],[4,-4],[-16,12]]);
+        const lt = el('text',{x:px1+ldx,y:py1+ldy,'font-size':13,fill:'#1A1A1A'});
+        lt.textContent = badge;
+        svg.appendChild(lt);
+      }
       continue;
     }
     const plotX0 = xmin+padX*0.05, plotX1 = xmax-padX*0.05;
@@ -364,9 +448,36 @@ function renderScene(container, scene, size=260){
       }
       drawCurve = {...c, xrange:[Math.min(nearZero,edge), Math.max(nearZero,edge)]};
     }
+    let lastSeg = null;
     for (const seg of sampleCurve(drawCurve)){
       const d = seg.map(([x,y],i)=>{ const [px,py]=toPx(x,y); return `${i===0?'M':'L'}${px.toFixed(1)},${py.toFixed(1)}`; }).join(' ');
       svg.appendChild(el('path',{d, fill:'none', stroke:'#1A1A1A','stroke-width':1.4}));
+      lastSeg = seg;
+    }
+    if (lastSeg && lastSeg.length>0){
+      // 曲線の端にラベルを添えて、どの線がどの式かわかるようにする
+      // (直線は丸数字+下の凡例、放物線・反比例は式そのものを表示)
+      const endpoints = [lastSeg[0], lastSeg[lastSeg.length-1]];
+      const anchor = choice(endpoints);
+      const [apx,apy] = toPx(anchor[0], anchor[1]);
+      if (c.type==='line' && !c.unknownParam){
+        lineNumCounter++;
+        const num = lineNumCounter;
+        lineLegend.push({num, html: lineEqHTML(c)});
+        const badge = circledNum(num);
+        const candidates = [[5,-4],[5,12],[-14,-4],[-14,12],[5,-16],[5,20]];
+        const [ldx,ldy] = placeCurveLabel(apx, apy, badge, candidates);
+        const lt = el('text',{x:apx+ldx,y:apy+ldy,'font-size':13,fill:'#1A1A1A'});
+        lt.textContent = badge;
+        svg.appendChild(lt);
+      } else {
+        const label = curveLabelText(c);
+        const candidates = [[5,-4],[5,12],[-6*label.length-9,-4],[-6*label.length-9,12],[5,-16],[5,20]];
+        const [ldx,ldy] = placeCurveLabel(apx, apy, label, candidates);
+        const lt = el('text',{x:apx+ldx,y:apy+ldy,'font-size':10.5,fill:'#1A1A1A'});
+        lt.textContent = label;
+        svg.appendChild(lt);
+      }
     }
   }
   for (const [i,j,style] of segments){
@@ -376,19 +487,12 @@ function renderScene(container, scene, size=260){
   }
 
   // 点とラベル(近接時は重ならない位置を自動選択)
-  const placedBoxes = [];
   const CAND = [[7,-7],[7,15],[-15,-7],[-15,15],[7,4],[-15,4],[-3,-11],[-3,17]];
   function posToCandOrder(pos){
     if (pos==='below') return [1,7,3,5,0,2,4,6];
     if (pos==='left') return [2,4,3,5,0,1,6,7];
     if (pos==='above') return [0,4,1,5,2,3,6,7];
     return [0,4,1,5,2,3,6,7];
-  }
-  function boxOverlaps(bx){
-    for (const b of placedBoxes){
-      if (bx.x0<b.x1 && bx.x1>b.x0 && bx.y0<b.y1 && bx.y1>b.y0) return true;
-    }
-    return false;
   }
   for (const p of points){
     if (!p.label) continue;
@@ -410,6 +514,24 @@ function renderScene(container, scene, size=260){
     svg.appendChild(t);
   }
   container.appendChild(svg);
+
+  // 丸数字で示した直線の凡例(実際の式)を図の下に表示する
+  if (lineLegend.length>0){
+    const legendDiv = document.createElement('div');
+    legendDiv.className = 'graph-legend';
+    legendDiv.innerHTML = lineLegend
+      .map(e=>`<span class="legend-item">${circledNum(e.num)}：${e.html}</span>`)
+      .join('　');
+    container.appendChild(legendDiv);
+  }
+}
+const CIRCLED_DIGITS = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+function circledNum(n){ return CIRCLED_DIGITS[n-1] || `(${n})`; }
+/* 直線(line/vline)の実際の式を、凡例用にHTML(分数はformatNumで表記)で返す */
+function lineEqHTML(c){
+  if (c.type==='vline') return `<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`;
+  if (c.pointsStyle && c.pointsStyleLabels) return `点${c.pointsStyleLabels[0]}，${c.pointsStyleLabels[1]}を通る直線`;
+  return fmtLinear(c.m, c.b);
 }
 
 function curveYatX(c, x){
@@ -419,186 +541,358 @@ function curveYatX(c, x){
   return null;
 }
 function describeCurveName(c){
-  if (c.type==='parabola') return `関数<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`;
-  if (c.type==='inverse') return `関数<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`;
-  if (c.type==='vline') return `直線<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`;
+  if (c.type==='parabola'){
+    if (c.unknownParam) return `関数<span class="mathexpr">y=a<i>x</i>²</span>`;
+    return `関数<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`;
+  }
+  if (c.type==='inverse'){
+    if (c.unknownParam) return `関数<span class="mathexpr">y=k/<i>x</i></span>`;
+    return `関数<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`;
+  }
+  if (c.type==='vline'){
+    if (c.unknownParam) return `直線<span class="mathexpr"><i>x</i>=c</span>`;
+    return `直線<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`;
+  }
+  if (c.m===0){
+    if (c.unknownParam) return `直線<span class="mathexpr">y=c</span>`;
+    return `直線${fmtLinear(c.m,c.b)}`;
+  }
+  if (c.pointsStyle && c.pointsStyleLabels) return `2点${c.pointsStyleLabels[0]}、${c.pointsStyleLabels[1]}を通る直線`;
   return `直線${fmtLinear(c.m,c.b)}`;
+}
+/* 直線(line)の右辺だけを式の文字列(mathexprのinner)として返す。qFindParamのx反映モードで
+   「もう一方の曲線」の式にxを代入する手順を示すために使う。 */
+function curveEqRHS(c){
+  if (c.type==='parabola') return c.a===1?'<i>x</i>²':(c.a===-1?'-<i>x</i>²':`${formatNum(c.a)}<i>x</i>²`);
+  if (c.type==='inverse') return `${formatNum(c.k)}/<i>x</i>`;
+  return fmtLinear(c.m,c.b).replace('<span class="mathexpr">y = ','').replace(/<\/span>$/,'');
+}
+/* 図中に添える、どの線がどの式かを示すプレーンテキストのラベル */
+function formatNumPlain(x, maxDenom=12){
+  if (Object.is(x,-0)) x=0;
+  const f = toFraction(x, maxDenom);
+  if (!f) return `${Math.round(x*1000)/1000}`;
+  if (f.den === 1) return `${f.num}`;
+  return `${f.num}/${f.den}`;
+}
+function curveLabelText(c){
+  if (c.type==='parabola'){
+    if (c.unknownParam) return 'y=ax²';
+    return c.a===1 ? 'y=x²' : (c.a===-1 ? 'y=-x²' : `y=${formatNumPlain(c.a)}x²`);
+  }
+  if (c.type==='inverse'){
+    if (c.unknownParam) return 'y=k/x';
+    return `y=${formatNumPlain(c.k)}/x`;
+  }
+  if (c.type==='vline'){
+    if (c.unknownParam) return 'x=c';
+    return `x=${formatNumPlain(c.x)}`;
+  }
+  if (c.m===0){
+    if (c.unknownParam) return 'y=c';
+    return `y=${formatNumPlain(c.b)}`;
+  }
+  const mPart = c.m===1?'x':(c.m===-1?'-x':`${formatNumPlain(c.m)}x`);
+  if (c.b===0) return `y=${mPart}`;
+  return `y=${mPart}${c.b>0?'+':'-'}${formatNumPlain(Math.abs(c.b))}`;
 }
 
 /* ============ 場面(シーン)生成エンジン ============ */
+/* 方針: 図に登場する点は「関数と関数の交点」または「関数と座標軸(x軸・y軸)の交点」のみ。
+   任意に置いた点(グラフ上の適当な点、動点の中間位置など)は使わない。
+   まず曲線(放物線・直線・軸に平行な直線・反比例)だけを決め、そのあとで
+   曲線どうし/曲線と軸の「本物の交点」を機械的に列挙し、そこから点を選ぶ。 */
 function makeLabelPool(){
   const labels=['A','B','C','D','E','F','G','H','I','J','K','L','N','Q','R','S'];
   let li=0;
   return {next:()=>labels[li++]};
 }
-function makeXPool(){
-  const used=new Set();
-  return function freshX(range=[-6,6], excludeZero=true){
-    let x, guard=0;
-    do { x=randInt(range[0],range[1]); guard++; } while((excludeZero&&x===0||used.has(x))&&guard<80);
-    used.add(x);
-    return x;
-  };
-}
 
-function buildScene(config){
+function buildScene(config, shapePref){
   const {nPara, nLine, nAxisLine, hasInv} = config;
-  const curves=[], points=[];
-  const {next:nextLabel} = makeLabelPool();
-  const freshX = makeXPool();
+  const quadBias = shapePref==='quad' || shapePref==='parallelogram' || shapePref==='rhombus';
+  const curves=[];
   const usedA = new Set();
 
+  // 既存の曲線のどれかと「きれいな」値で交わるように、直線の傾き・切片(または軸に平行な直線の位置)を選ぶ
+  function anchorPick(existingCurves, kind){
+    if (existingCurves.length>0 && Math.random()<0.88){
+      for (let attempt=0; attempt<30; attempt++){
+        const T = choice(existingCurves);
+        let x0;
+        if (T.type==='inverse') x0 = Math.abs(randInt(2,9)) * (T.k>0?1:-1);
+        else { x0 = randInt(-6,6); if (x0===0) continue; }
+        const y0 = curveYatX(T, x0);
+        if (y0===null || !isNice(y0,8) || Math.abs(y0)>40) continue;
+        if (kind==='line'){
+          const m = choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]);
+          const b = y0 - m*x0;
+          if (!isNice(b,8) || Math.abs(b)>25) continue;
+          return {m,b};
+        }
+        if (kind==='hline') return {b:y0};
+        if (kind==='vline') return {x:x0};
+      }
+    }
+    if (kind==='line') return {m: choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]), b: randInt(-10,10)};
+    if (kind==='hline') return {b: choice([-1,1])*randInt(2,9)};
+    return {x: choice([-1,1])*randInt(2,9)};
+  }
+
+  // 放物線 nPara本
+  // ---- 2本目の放物線については、1本目とちょうど符号だけ逆(a2=-a1)の「x軸に関して対称な
+  //      ペア」にすることがある。この場合、y=a1x²とy=-a1x²は互いにx軸に関して対称なグラフになり、
+  //      任意の点(x0,a1x0²)に対して(x0,-a1x0²)がそのまま相手の放物線上の点(x軸対称移動先)になる
+  //      という強い性質が使える(qTwoParabolaRectで利用)。mirrorPairIdで互いのidを持たせて
+  //      後段の設問生成が検出できるようにする。 ----
   for (let i=0;i<nPara;i++){
     let a;
+    if (i===1 && curves.length>=1 && curves[0].type==='parabola' && Math.random()<(quadBias?0.55:0.4)){
+      a = -curves[0].a;
+      usedA.add(a);
+      const pairId = curves.length; // 2本目のid(この後curves.forEachでc.idとして確定する値と一致する)
+      curves[0].mirrorPairId = pairId;
+      curves.push({type:'parabola', a, mirrorPairId: 0});
+      continue;
+    }
     const aChoices = i===1
       ? [1,0.5,1/3,0.25,2,1/6,-1,-0.5,-1/3,-0.25,-2,-1/6]
       : [1,0.5,1/3,0.25,2,1/6];
     do { a=choice(aChoices); } while (usedA.has(a) && usedA.size<aChoices.length);
     usedA.add(a);
-    const curveIdx=curves.length;
-    curves.push({type:'parabola', a, pointLabels:[]});
-    for (let j=0;j<2;j++){
-      const x0=freshX();
-      const label=nextLabel();
-      points.push({x:x0,y:a*x0*x0,label,curveIdx,isIntersection:false});
-      curves[curveIdx].pointLabels.push(label);
-    }
+    curves.push({type:'parabola', a});
   }
-  function tryIntersectionPoint(minAbsY){
-    const existingCurves = curves.filter(cv=>cv.type!=='vline');
-    if (existingCurves.length===0) return null;
-    for (let attempt=0; attempt<30; attempt++){
-      const T = choice(existingCurves);
-      let x0;
-      if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
-      else x0 = freshX();
-      const y0 = curveYatX(T, x0);
-      if (!isNice(y0,8) || Math.abs(y0)>40) continue;
-      if (minAbsY!==undefined && Math.abs(y0)<minAbsY) continue;
-      return {x0,y0,T};
-    }
-    return null;
-  }
-  function tryIntersectionPointForVertical(minAbsX){
-    const existingCurves = curves.filter(cv=>cv.type!=='vline');
-    if (existingCurves.length===0) return null;
-    for (let attempt=0; attempt<30; attempt++){
-      const T = choice(existingCurves);
-      let x0;
-      if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
-      else x0 = freshX();
-      if (Math.abs(x0)<minAbsX) continue;
-      const y0 = curveYatX(T, x0);
-      if (!isNice(y0,8) || Math.abs(y0)>40) continue;
-      return {x0,y0,T};
-    }
-    return null;
-  }
-  const AXIS_MIN_DIST = 2;
 
-  // 一次関数(一般の傾いた直線) nLine本
+  // 一次関数(傾きのある直線) nLine本
   for (let i=0;i<nLine;i++){
-    let built=false;
-    if (points.length>=2 && Math.random()<0.85){
-      const idxs=[...points.keys()];
-      for (let t=0;t<12 && !built;t++){
-        const i1=choice(idxs); let i2=choice(idxs);
-        if (i1===i2) continue;
-        if (points[i1].curveIdx === points[i2].curveIdx) continue;
-        const P1=points[i1], P2=points[i2];
-        if (Math.abs(P1.x-P2.x)<1e-9) continue;
-        const m=(P2.y-P1.y)/(P2.x-P1.x), b=P1.y-m*P1.x;
-        if (Math.abs(m)<1e-9) continue;
-        if (!isNice(m,6)||!isNice(b,6)) continue;
-        if (Math.abs(m)>10||Math.abs(b)>25) continue;
-        curves.push({type:'line', m, b, connector:true, through:[P1.label,P2.label], pointLabels:[]});
-        built=true;
-      }
+    const anchors = curves.filter(c=>c.type!=='vline');
+    const {m,b} = anchorPick(anchors, 'line');
+    let bb = b;
+    if (curves.some(c=>c.type==='line' && Math.abs(c.m-m)<1e-9 && Math.abs(c.b-bb)<1e-9)){
+      bb = b + choice([-1,1])*randInt(1,3);
     }
-    if (built) continue;
-    const curveIdx = curves.length;
-    let sharedPoint = null;
-    const existingOthers = curves.filter(cv=>cv.type!=='vline');
-    if (existingOthers.length>0 && Math.random()<0.92){
-      for (let attempt=0; attempt<25 && !sharedPoint; attempt++){
-        const T = choice(existingOthers);
-        let x0;
-        if (T.type==='inverse') x0 = Math.abs(freshX([2,9])) * (T.k>0?1:-1);
-        else x0 = freshX();
-        const y0 = curveYatX(T, x0);
-        const m = choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]);
-        const b = y0 - m*x0;
-        if (!isNice(b,8) || Math.abs(b)>25) continue;
-        sharedPoint = {x0,y0,m,b,T};
-      }
-    }
-    if (sharedPoint){
-      const {x0,y0,m,b,T} = sharedPoint;
-      const label = nextLabel();
-      curves.push({type:'line', m, b, connector:false, pointLabels:[label], sharedIntersection:true, intersectsWith:T, _sharedLabel:label});
-      points.push({x:x0,y:y0,label,curveIdx,isIntersection:true});
-      const x1=freshX(); const label2=nextLabel();
-      points.push({x:x1,y:m*x1+b,label:label2,curveIdx,isIntersection:false});
-      curves[curveIdx].pointLabels.push(label2);
-    } else {
-      const m = choice([-3,-2,-1,-0.5,-1/3,1/3,0.5,1,2,3]);
-      const b = randInt(-8,8);
-      curves.push({type:'line', m, b, connector:false, pointLabels:[]});
-      for (let j=0;j<2;j++){
-        const x0=freshX();
-        const label=nextLabel();
-        points.push({x:x0,y:m*x0+b,label,curveIdx,isIntersection:false});
-        curves[curveIdx].pointLabels.push(label);
-      }
-    }
+    curves.push({type:'line', m, b:bb});
   }
 
   // 軸に平行な直線(x=定数、y=定数) nAxisLine本
+  // ---- 放物線+2本の水平線で「y軸に関して左右対称な台形」が作れるように、
+  //      2本とも水平にし、かつ放物線ときれいな対称点で交わるy座標をあらかじめ2つ選んでおくことがある ----
+  const paraForSym = curves.find(c=>c.type==='parabola');
+  let symHLinesPlanned = [];
+  if (paraForSym && nAxisLine>=2 && Math.random()<(quadBias?0.95:0.75)){
+    const xCands = shuffleArr([1,2,3,4,5,6]).filter(x=>{
+      const y = paraForSym.a*x*x;
+      return isNice(y,8) && Math.abs(y)<=40;
+    });
+    if (xCands.length>=2){
+      symHLinesPlanned = xCands.slice(0,2).map(x=>({b: paraForSym.a*x*x}));
+    }
+  }
+  // ---- 上に開く放物線・下に開く放物線が両方ある場合、両方できれいなy座標になるxを1つ選び、
+  //      軸に平行な直線x=定数としてその位置を使うことがある(2つの放物線でできる長方形用) ----
+  const upParaForRect = curves.find(c=>c.type==='parabola' && c.a>0);
+  const downParaForRect = curves.find(c=>c.type==='parabola' && c.a<0);
+  let rectXPlanned = null;
+  if (upParaForRect && downParaForRect && nAxisLine>=1 && Math.random()<(quadBias?0.9:0.6)){
+    const xCands = shuffleArr([1,2,3,4,5,6,7,8]).filter(x=>{
+      const yu = upParaForRect.a*x*x, yd = downParaForRect.a*x*x;
+      return isNice(yu,8) && isNice(yd,8) && Math.abs(yu)<=40 && Math.abs(yd)<=40 && Math.abs(yu-yd)>1e-6;
+    });
+    if (xCands.length>0) rectXPlanned = xCands[0];
+  }
   for (let i=0;i<nAxisLine;i++){
-    const curveIdx = curves.length;
-    const horizontal = Math.random()<0.5;
+    const anchors = curves.filter(c=>c.type!=='vline');
+    let horizontal = Math.random()<0.5;
+    let b;
+    if (symHLinesPlanned.length>0){
+      horizontal = true;
+      b = symHLinesPlanned.shift().b;
+    } else if (rectXPlanned!==null){
+      horizontal = false;
+    }
     if (horizontal){
-      const hit = tryIntersectionPoint(AXIS_MIN_DIST);
-      let b;
-      if (hit) b = hit.y0;
-      else { const mag = randInt(2,8); b = Math.random()<0.5 ? mag : -mag; }
-      curves.push({type:'line', m:0, b, connector:false, pointLabels:[], sharedIntersection: !!hit, intersectsWith: hit?hit.T:null});
-      const label = nextLabel();
-      if (hit) curves[curveIdx]._sharedLabel = label;
-      points.push({x: hit?hit.x0:freshX(), y:b, label, curveIdx, isIntersection: !!hit});
-      curves[curveIdx].pointLabels.push(label);
-      const x1=freshX(); const label2=nextLabel();
-      points.push({x:x1,y:b,label:label2,curveIdx,isIntersection:false});
-      curves[curveIdx].pointLabels.push(label2);
+      if (b===undefined){
+        const paraAnchors = anchors.filter(c=>c.type==='parabola');
+        const useAnchors = (paraAnchors.length>0 && Math.random()<0.7) ? paraAnchors : anchors;
+        ({b} = anchorPick(useAnchors, 'hline'));
+      }
+      if (b===0) b = choice([-1,1])*randInt(2,8);
+      if (curves.some(c=>c.type==='line' && Math.abs(c.m)<1e-9 && Math.abs(c.b-b)<1e-9)) b += choice([-1,1])*randInt(1,3);
+      curves.push({type:'line', m:0, b});
     } else {
-      const hit = tryIntersectionPointForVertical(AXIS_MIN_DIST);
-      let c;
-      if (hit) c = hit.x0;
-      else { const mag = randInt(2,8); c = Math.random()<0.5 ? mag : -mag; }
-      curves.push({type:'vline', x:c, connector:false, pointLabels:[], sharedIntersection: !!hit, intersectsWith: hit?hit.T:null});
-      const label = nextLabel();
-      if (hit) curves[curveIdx]._sharedLabel = label;
-      points.push({x:c, y: hit?hit.y0:randInt(-8,8), label, curveIdx, isIntersection: !!hit});
-      curves[curveIdx].pointLabels.push(label);
-      const y1=randInt(-8,8); const label2=nextLabel();
-      points.push({x:c,y:y1,label:label2,curveIdx,isIntersection:false});
-      curves[curveIdx].pointLabels.push(label2);
+      let x;
+      if (rectXPlanned!==null){ x = rectXPlanned; rectXPlanned = null; }
+      else { ({x} = anchorPick(anchors, 'vline')); }
+      if (x===0) x = choice([-1,1])*randInt(2,8);
+      curves.push({type:'vline', x});
     }
   }
 
+  // 反比例
   if (hasInv){
     const k = choice([6,8,9,10,12,15,16,18,20,24]);
-    const curveIdx=curves.length;
-    curves.push({type:'inverse', k, pointLabels:[]});
-    const nPts = (nPara===0 && nLine===0) ? 2 : 1;
-    for (let j=0;j<nPts;j++){
-      const x0 = Math.abs(freshX([2,9]));
-      const label=nextLabel();
-      points.push({x:x0,y:k/x0,label,curveIdx,isIntersection:false});
-      curves[curveIdx].pointLabels.push(label);
+    curves.push({type:'inverse', k});
+  }
+
+  // ---- 放物線+水平線の対称な2交点を1本の対角線、y軸上の2点をもう1本の対角線とする「ひし形」が
+  //      作れるように、条件が揃っている場合に一定確率で2本の傾きのある直線の切片を意図的に揃える ----
+  {
+    const paraList = curves.filter(c=>c.type==='parabola');
+    const hlineList = curves.filter(c=>c.type==='line' && Math.abs(c.m)<1e-9);
+    const slopedList = curves.filter(c=>c.type==='line' && Math.abs(c.m)>1e-9);
+    if (paraList.length>0 && hlineList.length>0 && slopedList.length>=2 && Math.random()<(quadBias?0.95:0.7)){
+      const hl = choice(hlineList);
+      const k = hl.b;
+      const dChoices = [1,2,3,1.5,2.5,4].filter(d=>{
+        const up=k+d, down=k-d;
+        return isNice(up,8) && isNice(down,8) && Math.abs(up)<=25 && Math.abs(down)<=25;
+      });
+      if (dChoices.length>0){
+        const d = choice(dChoices);
+        const [lnA, lnB] = shuffleArr(slopedList).slice(0,2);
+        if (lnA && lnB){
+          lnA.b = k+d;
+          lnB.b = k-d;
+          if (Math.abs(lnA.m-lnB.m)<1e-9 && Math.abs(lnA.b-lnB.b)<1e-9) lnB.b += choice([-1,1]);
+        }
+      }
     }
   }
-  return {curves, points};
+
+  // ---- 2直線+軸に平行な2辺をもつ「正方形」(qSquareOnTwoLines)が作れるように、
+  //      条件が揃っている場合に一定確率で2本の傾きのある直線の傾き・切片を、
+  //      きれいな正方形が求まることがわかっている組にすることがある ----
+  {
+    const slopedList = curves.filter(c=>c.type==='line' && Math.abs(c.m)>1e-9);
+    if (slopedList.length>=2 && Math.random()<(quadBias?0.65:0.4)){
+      // (m1,m2)の組。s=a(m1-m2)/(1+m2) または a(m1-m2)/(m2-1) が整数aに対してきれいになる組を選んでいる。
+      const curatedPairs = [[4,0.5],[3,-1],[2,-0.5],[2,1/3],[6,-1],[4,-1],[3,1/2],[2,-1/3]];
+      const [cm1,cm2] = choice(curatedPairs);
+      const [lnA, lnB] = shuffleArr(slopedList).slice(0,2);
+      if (lnA && lnB){
+        const swap = Math.random()<0.5;
+        lnA.m = swap?cm2:cm1; lnA.b = 0;
+        lnB.m = swap?cm1:cm2; lnB.b = 0;
+      }
+    }
+  }
+
+  curves.forEach((c,i)=>{ c.id = i; });
+
+  // ---- 曲線どうし・曲線と軸の「本物の交点」をすべて列挙する ----
+  const raw = [];
+  for (let i=0;i<curves.length;i++){
+    for (let j=i+1;j<curves.length;j++){
+      const sols = intersectCurves(curves[i], curves[j]);
+      for (const [x,y] of sols){
+        if (!isNice(x,6) || !isNice(y,8)) continue;
+        if (Math.abs(x)>12 || Math.abs(y)>50) continue;
+        const other = sols.find(s=>Math.abs(s[0]-x)>1e-6);
+        raw.push({x,y,origin:{kind:'cc', c1:curves[i].id, c2:curves[j].id, otherX: other?other[0]:null}});
+      }
+    }
+  }
+  curves.forEach(c=>{
+    if (c.type==='line'){
+      if (Math.abs(c.m)>1e-9){
+        const x0 = -c.b/c.m;
+        if (isNice(x0,6) && Math.abs(x0)<=12) raw.push({x:x0,y:0,origin:{kind:'axis', axis:'x', c1:c.id}});
+      }
+      if (isNice(c.b,8) && Math.abs(c.b)<=50) raw.push({x:0,y:c.b,origin:{kind:'axis', axis:'y', c1:c.id}});
+    } else if (c.type==='vline'){
+      raw.push({x:c.x, y:0, origin:{kind:'axis', axis:'x', c1:c.id}});
+      if (Math.abs(c.x)<1e-9) raw.push({x:0,y:0,origin:{kind:'axis', axis:'y', c1:c.id}});
+    } else if (c.type==='parabola'){
+      raw.push({x:0,y:0,origin:{kind:'axis', axis:'x', c1:c.id}});
+    }
+  });
+
+  // ---- 同じ座標の点はまとめる ----
+  const merged=[];
+  for (const p of raw){
+    let m = merged.find(q=>Math.abs(q.x-p.x)<1e-6 && Math.abs(q.y-p.y)<1e-6);
+    if (!m){ m={x:p.x,y:p.y,origins:[]}; merged.push(m); }
+    m.origins.push(p.origin);
+  }
+  for (let i=merged.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [merged[i],merged[j]]=[merged[j],merged[i]]; }
+
+  // ---- ラベルを割り振る ----
+  const {next:nextLabel} = makeLabelPool();
+  const points=[];
+  for (const m of merged.slice(0,16)){
+    const isOrigin = Math.abs(m.x)<1e-9 && Math.abs(m.y)<1e-9;
+    const label = isOrigin ? 'O' : nextLabel();
+    const primary = m.origins.find(o=>o.kind==='cc') || m.origins[0];
+    points.push({x:m.x, y:m.y, label, isIntersection:true, origin:primary});
+  }
+
+  // ---- 傾きのある直線については、式を直接示す代わりに「2点を通る直線」として説明することがある ----
+  for (const c of curves){
+    if (c.type!=='line' || Math.abs(c.m)<1e-9) continue;
+    const onLine = points.filter(p=>p.label && Math.abs(p.y-(c.m*p.x+c.b))<1e-6);
+    if (onLine.length>=2 && Math.random()<0.5){
+      const chosen2 = shuffleArr(onLine).slice(0,2);
+      c.pointsStyle = true;
+      c.pointsStyleLabels = [chosen2[0].label, chosen2[1].label];
+    }
+  }
+
+  // ---- ある確率で、単一パラメータの曲線(放物線・反比例・軸に平行な直線)の係数を隠し、
+  //      点の座標(の一部)から求めさせる ----
+  let hidden = null;
+  if (Math.random() < 0.4){
+    // x軸対称ペア(mirrorPairId)を持つ放物線は、係数を隠すと「符号だけ逆」という前提自体が
+    // 崩れて設問が過度に複雑・曖昧になるため、係数隠しの対象からは除外する。
+    const candidates = curves.filter(c=>(c.type==='parabola' && c.mirrorPairId===undefined) || c.type==='inverse' || c.type==='vline' || (c.type==='line' && Math.abs(c.m)<1e-9));
+    for (let i=candidates.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [candidates[i],candidates[j]]=[candidates[j],candidates[i]]; }
+    for (const H of candidates){
+      const revealPointsAll = points.filter(p=>p.origin && p.origin.kind==='cc' && (p.origin.c1===H.id || p.origin.c2===H.id));
+      if (revealPointsAll.length===0) continue;
+
+      if (H.type==='parabola' || H.type==='inverse'){
+        const revealPoints = revealPointsAll.filter(p=>Math.abs(p.x)>1e-9);
+        if (revealPoints.length===0) continue;
+        const P = choice(revealPoints);
+        const otherId = P.origin.c1===H.id ? P.origin.c2 : P.origin.c1;
+        const other = curves.find(cc=>cc.id===otherId);
+        let revealCoord = 'both';
+        if (other && other.type!=='vline' && Math.random()<0.45) revealCoord = 'x';
+        H.unknownParam = true;
+        hidden = {curveId: H.id, pointLabel: P.label, otherId, revealCoord};
+        break;
+      }
+      if (H.type==='line' && Math.abs(H.m)<1e-9){
+        // 水平な直線 y=c: yを直接見せると一手で答えが出てしまうので、xだけを見せる
+        const valid = [];
+        for (const p of revealPointsAll){
+          const otherId = p.origin.c1===H.id ? p.origin.c2 : p.origin.c1;
+          const other = curves.find(cc=>cc.id===otherId);
+          if (other && other.type!=='vline') valid.push({p, otherId});
+        }
+        if (valid.length===0) continue;
+        const pick = choice(valid);
+        H.unknownParam = true;
+        hidden = {curveId: H.id, pointLabel: pick.p.label, otherId: pick.otherId, revealCoord: 'x'};
+        break;
+      }
+      if (H.type==='vline'){
+        // 垂直な直線 x=c: xを直接見せると一手で答えが出てしまうので、yだけを見せる
+        // (もう一方の曲線がyについて一意にxを求められる場合、つまり傾きのある直線か反比例の場合のみ対象とする)
+        const valid = [];
+        for (const p of revealPointsAll){
+          const otherId = p.origin.c1===H.id ? p.origin.c2 : p.origin.c1;
+          const other = curves.find(cc=>cc.id===otherId);
+          if (other && (other.type==='inverse' || (other.type==='line' && Math.abs(other.m)>1e-9))) valid.push({p, otherId});
+        }
+        if (valid.length===0) continue;
+        const pick = choice(valid);
+        H.unknownParam = true;
+        hidden = {curveId: H.id, pointLabel: pick.p.label, otherId: pick.otherId, revealCoord: 'y'};
+        break;
+      }
+    }
+  }
+  return {curves, points, hidden};
 }
 
 /* ============ 設問メニュー ============ */
@@ -608,19 +902,31 @@ function polygonAreaSorted(points){
   const sorted = [...points].sort((a,b)=>Math.atan2(a[1]-cy,a[0]-cx) - Math.atan2(b[1]-cy,b[0]-cx));
   return {area: shoelace(sorted), order: sorted};
 }
-function preferredPool(points, minCount, includeOrigin){
-  const withO = includeOrigin ? [{x:0,y:0,label:'O',isIntersection:true}, ...points] : points;
-  const inter = withO.filter(p=>p.isIntersection);
-  return inter.length>=minCount ? inter : withO;
+/* 点pがどのcurve(たち)の交点/軸との交点として作られたかを、そのtype(parabola/line/vline/inverse)の
+   配列で返す。「四角形は一次関数だけでは出ないように」というルールの判定に使う。 */
+function pointOriginCurveTypes(scene, p){
+  const types = [];
+  if (!p.origin) return types;
+  const c1 = scene.curves.find(c=>c.id===p.origin.c1);
+  if (c1) types.push(c1.type);
+  if (p.origin.kind==='cc'){
+    const c2 = scene.curves.find(c=>c.id===p.origin.c2);
+    if (c2) types.push(c2.type);
+  }
+  return types;
 }
 function qQuadArea(scene){
-  const pool = preferredPool(scene.points, 4, true);
+  const pool = scene.points;
   if (pool.length<4) return null;
   for (let tries=0; tries<20; tries++){
     const idxs=[...pool.keys()];
     const chosen=[];
     while (chosen.length<4){ const i=choice(idxs); if(!chosen.includes(i)) chosen.push(i); }
     const pts = chosen.map(i=>pool[i]);
+    // 「四角形は一次関数(直線)だけでは出ないように」— 選んだ4点が参照するcurveの中に
+    // 放物線または反比例が1つも含まれない(=すべてline/vlineのみ)場合はこの組を諦める。
+    const allTypes = pts.flatMap(p=>pointOriginCurveTypes(scene,p));
+    if (!allTypes.some(t=>t==='parabola'||t==='inverse')) continue;
     const {area, order} = polygonAreaSorted(pts.map(p=>[p.x,p.y]));
     if (area<1 || area>350 || !isNice(area,12)) continue;
     let degenerate=false;
@@ -649,10 +955,10 @@ function rangeOfParabola(a, d1, d2){
   return [Math.min(...ys), Math.max(...ys)];
 }
 function qRange(scene){
-  const paraCurves = scene.curves.filter(c=>c.type==='parabola');
+  const paraCurves = scene.curves.filter(c=>c.type==='parabola' && !c.unknownParam);
   if (paraCurves.length===0) return null;
   const c = choice(paraCurves);
-  const curveIdx = scene.curves.indexOf(c);
+  const curveIdx = c.id;
   const d1 = randInt(-8,-1), d2 = randInt(1,8);
   const [lo,hi] = rangeOfParabola(c.a, d1, d2);
   const y1 = c.a*d1*d1, y2 = c.a*d2*d2;
@@ -667,7 +973,7 @@ function qRange(scene){
       `\n以上より、${formatNum(lo)} ≦ y ≦ ${formatNum(hi)}。` };
 }
 function qLineThrough2(scene){
-  const pool = preferredPool(scene.points, 2, false);
+  const pool = scene.points;
   if (pool.length<2) return null;
   for (let tries=0; tries<15; tries++){
     const idxs=[...pool.keys()];
@@ -686,7 +992,7 @@ function qLineThrough2(scene){
   return null;
 }
 function qTriangleArea(scene){
-  const allPts = preferredPool(scene.points, 3, true);
+  const allPts = scene.points;
   if (allPts.length<3) return null;
   for (let tries=0; tries<15; tries++){
     const idxs=[...allPts.keys()];
@@ -704,7 +1010,7 @@ function qTriangleArea(scene){
   return null;
 }
 function qBisectMedian(scene){
-  const allPts = preferredPool(scene.points, 3, true);
+  const allPts = scene.points;
   if (allPts.length<3) return null;
   for (let tries=0; tries<20; tries++){
     const idxs=[...allPts.keys()];
@@ -721,6 +1027,140 @@ function qBisectMedian(scene){
       prompt: `3点${v.label}、${p1.label}、${p2.label}を結んでできる三角形について、頂点${v.label}を通り、この三角形の面積を2等分する直線の式を求めなさい。`,
       final: fmtLinear(m,b),
       steps: `三角形の面積を2等分する直線は、必ず「1つの頂点」と「その向かい側の辺の中点」を通る(中線)。これは、中線で分けられた2つの三角形が底辺の長さが等しく高さが共通なため、面積も等しくなるからである。\n線分${p1.label}${p2.label}の中点をMとすると、\nM=((${formatNum(p1.x)}+${formatNum(p2.x)})/2, (${formatNum(p1.y)}+${formatNum(p2.y)})/2)=${fmtPoint(M[0],M[1])}\nとなる。頂点${v.label}${fmtPoint(v.x,v.y)}とMを通る直線の傾きは\nm=(${formatNum(M[1])}−(${formatNum(v.y)}))÷(${formatNum(M[0])}−(${formatNum(v.x)}))=${formatNum(m)}\nで、これを使って切片を求めると、直線の式は${fmtLinear(m,b)}となる。` };
+  }
+  return null;
+}
+/* ===== (中級)面積→その面積を2等分する直線、のペア =====
+   三角形の1つの頂点Vから出る2辺VA・VB上にD・Eをとり、VD:DA・VE:EBの比の積が1:2になるように選ぶと、
+   △VDEの面積は△VABの面積のちょうど半分になる(頂点を共有する三角形の面積比は、その頂点から出る
+   2辺の比の積になるという性質を利用)。qBisectMedian(中線)とは異なる構成なので重複しない。 */
+function buildAreaBisectPair(scene){
+  const allPts = scene.points;
+  if (allPts.length<3) return null;
+  const validRatios = [[3,4,2,3],[2,3,3,4],[4,5,5,8],[3,5,5,6],[2,5,5,4]];
+  for (let tries=0; tries<60; tries++){
+    const idxs=[...allPts.keys()];
+    const chosen=[];
+    while (chosen.length<3){ const i=choice(idxs); if(!chosen.includes(i)) chosen.push(i); }
+    const pts3 = chosen.map(i=>allPts[i]);
+    for (let vi=0; vi<3; vi++){
+      const V = pts3[vi], A = pts3[(vi+1)%3], B = pts3[(vi+2)%3];
+      if (collinear([V.x,V.y],[A.x,A.y],[B.x,B.y])) continue;
+      const area = shoelace([[V.x,V.y],[A.x,A.y],[B.x,B.y]]);
+      if (area<2 || area>300 || !isNice(area,12)) continue;
+      for (const rp0 of shuffleArr(validRatios)){
+        let found = null;
+        for (const rp of [rp0, [rp0[2],rp0[3],rp0[0],rp0[1]]]){
+          const [pn,pd,qn,qd] = rp;
+          const p = pn/pd, q = qn/qd;
+          const Dx=V.x+p*(A.x-V.x), Dy=V.y+p*(A.y-V.y);
+          const Ex=V.x+q*(B.x-V.x), Ey=V.y+q*(B.y-V.y);
+          if (!isNice(Dx,8)||!isNice(Dy,8)||!isNice(Ex,8)||!isNice(Ey,8)) continue;
+          if (Math.abs(Ex)>25||Math.abs(Ey)>60||Math.abs(Dx)>25||Math.abs(Dy)>60) continue;
+          if (allPts.some(pp=>Math.abs(pp.x-Dx)<1e-6 && Math.abs(pp.y-Dy)<1e-6)) continue;
+          if (allPts.some(pp=>Math.abs(pp.x-Ex)<1e-6 && Math.abs(pp.y-Ey)<1e-6)) continue;
+          found = {pn,pd,qn,qd,Dx,Dy,Ex,Ey};
+          break;
+        }
+        if (!found) continue;
+        const {pn,pd,qn,qd,Dx,Dy,Ex,Ey} = found;
+        const qArea = {
+          kind:'area', extraPoints:[], trianglePts:[V.label,A.label,B.label],
+          prompt: `3点${V.label}、${A.label}、${B.label}を結んでできる三角形の面積を求めなさい。`,
+          final: `${formatNum(area,20)}`,
+          steps: `${V.label}${fmtPoint(V.x,V.y)}、${A.label}${fmtPoint(A.x,A.y)}、${B.label}${fmtPoint(B.x,B.y)}とする。\nシューレース公式(座標から直接面積を求める公式)を使うと、面積=${formatNum(area,20)}となる。`
+        };
+        const qBisect = {
+          kind:'bisectArea', extraPoints:[{x:Dx,y:Dy,label:'D'},{x:Ex,y:Ey,label:'E'}],
+          trianglePts:[V.label,A.label,B.label],
+          prompt: `(2)で求めた三角形${V.label}${A.label}${B.label}について、辺${V.label}${A.label}上に点D${fmtPoint(Dx,Dy)}をとる。点Dを通り、この三角形の面積を2等分する直線が辺${V.label}${B.label}と交わる点の座標を求めなさい。`,
+          final: fmtPoint(Ex,Ey),
+          steps: `点Dは辺${V.label}${A.label}を${V.label}D:D${A.label}=${pn}:${pd-pn}に分ける点である。頂点${V.label}を共有する2つの三角形の面積比は、その頂点から出る2辺の比の積になる。\nよって面積を2等分するには、辺${V.label}${B.label}上の点Eを${V.label}E:E${B.label}=${qn}:${qd-qn}の位置に取ればよい((${pn}/${pd})×(${qn}/${qd})=1/2)。\nE=${V.label}+(${qn}/${qd})×(${B.label}−${V.label})を計算すると、E${fmtPoint(Ex,Ey)}となる。`
+        };
+        return {qArea, qBisect};
+      }
+    }
+  }
+  return null;
+}
+
+/* ===== 式の一部(a・k)を隠し、点の座標から求めさせる ===== */
+function qFindParam(scene){
+  if (!scene.hidden) return null;
+  const H = scene.curves.find(c=>c.id===scene.hidden.curveId);
+  const P = scene.points.find(p=>p.label===scene.hidden.pointLabel);
+  if (!H || !P) return null;
+  const revealCoord = scene.hidden.revealCoord || 'both';
+  const other = scene.hidden.otherId!==undefined ? scene.curves.find(c=>c.id===scene.hidden.otherId) : null;
+
+  if (H.type==='parabola'){
+    const a = P.y/(P.x*P.x);
+    if (revealCoord==='x'){
+      if (!other) return null;
+      const y = curveYatX(other, P.x);
+      const otherName = describeCurveName(other);
+      return {
+        kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+        prompt: `関数<span class="mathexpr">y=a<i>x</i>²</span>のグラフ上に点${P.label}があり、そのx座標は${formatNum(P.x)}である。点${P.label}は${otherName}のグラフ上にもある。aの値を求めなさい。`,
+        final: `${formatNum(a)}`,
+        steps: `点${P.label}は${otherName}のグラフ上にもあり、そのx座標は${formatNum(P.x)}なので、\ny=${curveEqRHS(other)}にx=${formatNum(P.x)}を代入すると、y=${formatNum(y)}となる。よって${P.label}${fmtPoint(P.x,y)}。\n<span class="mathexpr">y=a<i>x</i>²</span>に${P.label}の座標${fmtPoint(P.x,y)}を代入すると、\n${formatNum(y)}=a×(${formatNum(P.x)})²\nより、a=${formatNum(a)}。`
+      };
+    }
+    return {
+      kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+      prompt: `関数<span class="mathexpr">y=a<i>x</i>²</span>のグラフは点${P.label}${fmtPoint(P.x,P.y)}を通る。aの値を求めなさい。`,
+      final: `${formatNum(a)}`,
+      steps: `<span class="mathexpr">y=a<i>x</i>²</span>に${P.label}の座標${fmtPoint(P.x,P.y)}を代入すると、\n${formatNum(P.y)}=a×(${formatNum(P.x)})²\nより、a=${formatNum(a)}。`
+    };
+  }
+  if (H.type==='inverse'){
+    const k = P.x*P.y;
+    if (revealCoord==='x'){
+      if (!other) return null;
+      const y = curveYatX(other, P.x);
+      const otherName = describeCurveName(other);
+      return {
+        kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+        prompt: `関数<span class="mathexpr">y=k/<i>x</i></span>のグラフ上に点${P.label}があり、そのx座標は${formatNum(P.x)}である。点${P.label}は${otherName}のグラフ上にもある。kの値を求めなさい。`,
+        final: `${formatNum(P.x*y)}`,
+        steps: `点${P.label}は${otherName}のグラフ上にもあり、そのx座標は${formatNum(P.x)}なので、\ny=${curveEqRHS(other)}にx=${formatNum(P.x)}を代入すると、y=${formatNum(y)}となる。よって${P.label}${fmtPoint(P.x,y)}。\n<span class="mathexpr">y=k/<i>x</i></span>に${P.label}の座標${fmtPoint(P.x,y)}を代入すると、\n${formatNum(y)}=k÷(${formatNum(P.x)})\nより、k=${formatNum(P.x*y)}。`
+      };
+    }
+    return {
+      kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+      prompt: `関数<span class="mathexpr">y=k/<i>x</i></span>のグラフは点${P.label}${fmtPoint(P.x,P.y)}を通る。kの値を求めなさい。`,
+      final: `${formatNum(k)}`,
+      steps: `<span class="mathexpr">y=k/<i>x</i></span>に${P.label}の座標${fmtPoint(P.x,P.y)}を代入すると、\n${formatNum(P.y)}=k÷(${formatNum(P.x)})\nより、k=${formatNum(k)}。`
+    };
+  }
+  if (H.type==='line' && Math.abs(H.m)<1e-9){
+    if (!other) return null;
+    const y = curveYatX(other, P.x);
+    const otherName = describeCurveName(other);
+    return {
+      kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+      prompt: `x軸に平行な${describeCurveName(H)}のグラフ上に点${P.label}があり、そのx座標は${formatNum(P.x)}である。点${P.label}は${otherName}のグラフ上にもある。cの値を求めなさい。`,
+      final: `${formatNum(y)}`,
+      steps: `点${P.label}は${otherName}のグラフ上にもあり、そのx座標は${formatNum(P.x)}なので、\ny=${curveEqRHS(other)}にx=${formatNum(P.x)}を代入すると、y=${formatNum(y)}となる。よって${P.label}${fmtPoint(P.x,y)}。\n直線y=cは点${P.label}を通るので、c=${formatNum(y)}。`
+    };
+  }
+  if (H.type==='vline'){
+    if (!other) return null;
+    const otherName = describeCurveName(other);
+    let xVal, solveLine;
+    if (other.type==='inverse'){
+      xVal = other.k / P.y;
+      solveLine = `${otherName}の式にy=${formatNum(P.y)}を代入すると、\n${formatNum(P.y)}=${formatNum(other.k)}÷x\nより、x=${formatNum(xVal)}となる。`;
+    } else {
+      xVal = (P.y - other.b)/other.m;
+      solveLine = `${otherName}の式にy=${formatNum(P.y)}を代入すると、\n${formatNum(P.y)}=${formatNum(other.m)}×x+(${formatNum(other.b)})\nを解いて、x=${formatNum(xVal)}となる。`;
+    }
+    return {
+      kind:'findParam', extraPoints:[], curveIdx: H.id, refLabels:[P.label],
+      prompt: `y軸に平行な${describeCurveName(H)}のグラフ上に点${P.label}があり、そのy座標は${formatNum(P.y)}である。点${P.label}は${otherName}のグラフ上にもある。cの値を求めなさい。`,
+      final: `${formatNum(xVal)}`,
+      steps: `点${P.label}は${otherName}のグラフ上にもあり、そのy座標は${formatNum(P.y)}なので、\n${solveLine}\n直線x=cは点${P.label}${fmtPoint(xVal,P.y)}を通るので、c=${formatNum(xVal)}。`
+    };
   }
   return null;
 }
@@ -763,10 +1203,10 @@ function intersectCurves(cA, cB){
   return [];
 }
 function qIntersectionGeneral(scene){
-  const nonConnector = scene.curves.filter(c=>!c.connector);
-  if (nonConnector.length<2) return null;
+  const allCurves = scene.curves.filter(c=>!c.unknownParam);
+  if (allCurves.length<2) return null;
   const pairs=[];
-  for (let i=0;i<nonConnector.length;i++) for (let j=i+1;j<nonConnector.length;j++) pairs.push([nonConnector[i],nonConnector[j]]);
+  for (let i=0;i<allCurves.length;i++) for (let j=i+1;j<allCurves.length;j++) pairs.push([allCurves[i],allCurves[j]]);
   for (let tries=0;tries<15;tries++){
     const [cA,cB]=choice(pairs);
     const allSols = intersectCurves(cA,cB);
@@ -792,7 +1232,7 @@ function qIntersectionGeneral(scene){
 
     return {
       kind:'intersect', extraPoints:[{x:x0,y:y0,label:'P'}],
-      curveIdxs:[scene.curves.indexOf(cA), scene.curves.indexOf(cB)],
+      curveIdxs:[cA.id, cB.id],
       prompt: `${nameOf(cA)}と${nameOf(cB)}の交点${qualifier}Pとする。点Pの座標を求めなさい。`,
       final: fmtPoint(x0,y0),
       steps: stepDetail
@@ -853,9 +1293,9 @@ function allAreaSolutions(curve, F1,F2, targetArea){
   return [];
 }
 function qMovingArea(scene){
-  const hosts = scene.curves.filter(c=>c.type==='parabola'||c.type==='line'||c.type==='inverse');
+  const hosts = scene.curves.filter(c=>(c.type==='parabola'||c.type==='line'||c.type==='inverse') && !c.unknownParam);
   if (hosts.length===0) return null;
-  const pool = preferredPool(scene.points, 2, true);
+  const pool = scene.points;
   if (pool.length<2) return null;
   for (let attempt=0; attempt<250; attempt++){
     const host = choice(hosts);
@@ -896,7 +1336,7 @@ function qMovingArea(scene){
     const hostName = host.type==='parabola'?`放物線<span class="mathexpr">${host.a===1?'y=<i>x</i>²':`y=${formatNum(host.a)}<i>x</i>²`}</span>`:host.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(host.k)}/<i>x</i></span>`:`直線${fmtLinear(host.m,host.b)}`;
     const hostEqDesc = `<span class="mathexpr">P(<i>t</i>, ${host.type==='parabola'?(host.a===1?'<i>t</i>²':`${formatNum(host.a)}<i>t</i>²`):host.type==='inverse'?`${formatNum(host.k)}/<i>t</i>`:fmtLinear(host.m,host.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>')})</span>`;
     return {
-      kind:'movArea', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label,F2p.label], hostIdx: scene.curves.indexOf(host),
+      kind:'movArea', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label,F2p.label], hostIdx: host.id,
       prompt: `${hostName}上に動く点Pをとる。${domainText}△P${F1p.label}${F2p.label}の面積が${formatNum(targetArea,12)}となるとき、点Pの座標を求めなさい。`,
       final: `P${fmtPoint(t,Py)}`,
       steps: `点Pのx座標をtとおくと、${hostEqDesc}と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}、${F2p.label}${fmtPoint(F2p.x,F2p.y)}は分かっているので、△P${F1p.label}${F2p.label}の面積をtの式で表す(シューレース公式や、座標軸に垂直な補助線で長方形から余分な三角形を引く方法で表せる)。\nその式が${formatNum(targetArea,12)}に等しくなるという方程式を作って解くと、t=${formatNum(t)}(このときの条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
@@ -914,9 +1354,9 @@ function solveDistOnLine(m,b,F1,D){
   return solveQuadratic(A,B,C);
 }
 function qMovingLength(scene){
-  const lineHosts = scene.curves.filter(c=>c.type==='line');
+  const lineHosts = scene.curves.filter(c=>c.type==='line' && !c.unknownParam);
   if (lineHosts.length===0) return null;
-  const pool = preferredPool(scene.points, 1, true);
+  const pool = scene.points;
   if (pool.length<1) return null;
   for (let attempt=0; attempt<250; attempt++){
     const host = choice(lineHosts);
@@ -944,7 +1384,7 @@ function qMovingLength(scene){
     const lenStr = fmtSqrt(D);
     const tExpr = fmtLinear(host.m,host.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>');
     return {
-      kind:'movLength', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label], hostIdx: scene.curves.indexOf(host),
+      kind:'movLength', extraPoints:[{x:t,y:Py,label:'P'}], refLabels:[F1p.label], hostIdx: host.id,
       prompt: `直線${fmtLinear(host.m,host.b)}上に動く点Pをとる。${domainText}線分P${F1p.label}の長さが${lenStr}となるとき、点Pの座標を求めなさい。`,
       final: `P${fmtPoint(t,Py)}`,
       steps: `点Pのx座標をtとおくと、<span class="mathexpr">P(<i>t</i>, ${tExpr})</span>と表せる。\n${F1p.label}${fmtPoint(F1p.x,F1p.y)}との距離の2乗は、三平方の定理(2点間の距離の公式)から\n<span class="mathexpr">P${F1p.label}²=(<i>t</i>−(${formatNum(F1p.x)}))²+(${tExpr}−(${formatNum(F1p.y)}))²</span>\nと表せる。線分P${F1p.label}の長さが${lenStr}なので、この式が${lenStr}の2乗、つまり${formatNum(D)}に等しいとして方程式を解くと、<span class="mathexpr"><i>t</i>=${formatNum(t)}</span>(条件${domainText?'「'+domainText.replace('であるとき、','')+'」':''}を満たす)。\nよってP${fmtPoint(t,Py)}。`
@@ -953,29 +1393,1000 @@ function qMovingLength(scene){
   return null;
 }
 
-const PRIORITY = ['movArea','movLength','intersect','bisect','quad','area','line2pt','range'];
-function pickQuestions(scene){
-  const results = {
+/* ===== (上級)2つの関数上の点の垂直距離(縦の長さ)が与えられた値になるときの座標を求める =====
+   qMovingLengthの「2点間の距離→座標」の考え方を、固定点までの距離ではなく、同じx座標を持つ
+   2つの関数上の点の縦方向の距離(y座標の差)に置き換えたもの。 */
+function vertLenPolyCoeffs(cA, cB){
+  let A2=0, A1=0, A0=0, invC=null, invSign=0;
+  const add = (c, sign) => {
+    if (c.type==='parabola') A2 += sign*c.a;
+    else if (c.type==='line') { A1 += sign*c.m; A0 += sign*c.b; }
+    else if (c.type==='inverse') { invC = c; invSign = sign; }
+    else return false;
+    return true;
+  };
+  if (!add(cA,1)) return null;
+  if (!add(cB,-1)) return null;
+  return {A2,A1,A0,invC,invSign};
+}
+function solveVertLenT(cA, cB, targetLen){
+  const co = vertLenPolyCoeffs(cA,cB);
+  if (!co) return [];
+  if (co.invC && Math.abs(co.A2)>1e-12) return []; // 放物線×反比例は3次式になるため対象外
+  let res=[];
+  for (const L of [targetLen,-targetLen]){
+    if (co.invC){
+      res = res.concat(solveQuadratic(co.A1, co.A0-L, co.invSign*co.invC.k));
+    } else if (Math.abs(co.A2)>1e-12){
+      res = res.concat(solveQuadratic(co.A2, co.A1, co.A0-L));
+    } else if (Math.abs(co.A1)>1e-12){
+      res.push((L-co.A0)/co.A1);
+    }
+  }
+  return res.filter(t=>isFinite(t) && (!co.invC || Math.abs(t)>1e-6));
+}
+function qLengthGivenTarget(scene){
+  const cands = scene.curves.filter(c=>(c.type==='parabola'||c.type==='line'||c.type==='inverse') && !c.unknownParam);
+  if (cands.length<2) return null;
+  const nameOf = c => c.type==='parabola'?`放物線<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`:c.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`:`直線${fmtLinear(c.m,c.b)}`;
+  const exprOf = c => c.type==='parabola'?(c.a===1?'<i>t</i>²':`${formatNum(c.a)}<i>t</i>²`):c.type==='inverse'?`${formatNum(c.k)}/<i>t</i>`:fmtLinear(c.m,c.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>');
+  for (let attempt=0; attempt<250; attempt++){
+    const i1 = randInt(0,cands.length-1); let i2 = randInt(0,cands.length-1);
+    if (i1===i2) continue;
+    const cA = cands[i1], cB = cands[i2];
+    if (cA.type==='inverse' && cB.type==='inverse') continue;
+    if ((cA.type==='parabola' && cB.type==='inverse') || (cA.type==='inverse' && cB.type==='parabola')) continue;
+    const t = randInt(-7,7);
+    if (t===0 && (cA.type==='inverse' || cB.type==='inverse')) continue;
+    const yA = curveYatX(cA,t), yB = curveYatX(cB,t);
+    if (!isFinite(yA) || !isFinite(yB)) continue;
+    const diff = yA-yB;
+    if (Math.abs(diff)<1e-6) continue;
+    const targetLen = Math.abs(diff);
+    if (targetLen<1 || targetLen>60 || !isNice(targetLen,12)) continue;
+
+    const sols = solveVertLenT(cA,cB,targetLen).filter(x=>isNice(x,4) && Math.abs(x)<20);
+    const uniqueSols = [...new Set(sols.map(x=>Math.round(x*1e6)/1e6))];
+    if (!uniqueSols.some(x=>Math.abs(x-t)<1e-6)) continue;
+    if (uniqueSols.length>2) continue;
+    if ((cA.type==='inverse' || cB.type==='inverse') && uniqueSols.some(x=>Math.abs(x)<1e-6)) continue;
+
+    const answerAll = uniqueSols.length===2 ? uniqueSols : [t];
+    const ptsForEach = answerAll.map(x=>({x, y:curveYatX(cA,x)}));
+    const finalStr = ptsForEach.map(p=>`P${fmtPoint(p.x,p.y)}`).join(' または ');
+    const Py = curveYatX(cA,t), Qy = curveYatX(cB,t);
+
+    return {
+      kind:'lenTarget', extraPoints:[{x:t,y:Py,label:'P'},{x:t,y:Qy,label:'Q'}],
+      curveIdxs:[cA.id, cB.id],
+      prompt: `${nameOf(cA)}上に点P、${nameOf(cB)}上にPとx座標が等しい点Qをとる。線分PQの長さが${formatNum(targetLen,12)}となるとき、点Pの座標を求めなさい。${answerAll.length>1?'(考えられるものをすべて答えなさい。)':''}`,
+      final: finalStr,
+      steps: `点Pのx座標をtとおくと、P<span class="mathexpr">(<i>t</i>, ${exprOf(cA)})</span>、Q<span class="mathexpr">(<i>t</i>, ${exprOf(cB)})</span>と表せる。\n線分PQの長さは2点のy座標の差の絶対値なので、\n|${exprOf(cA)}−(${exprOf(cB)})|=${formatNum(targetLen,12)}\nという方程式ができる(符号の場合分けをして解く)。これを解くと、<span class="mathexpr"><i>t</i>=${answerAll.map(x=>formatNum(x)).join('、')}</span>。\nよって${finalStr}。`
+    };
+  }
+  return null;
+}
+
+/* ===== (発展)放物線の対称性を利用した四角形 =====
+   放物線 y=ax² はy軸に関して対称なので、水平な直線 y=k との交点は(-p,k),(p,k)のように、
+   x座標の符号だけが逆で同じy座標を持つ対称な2点になる。この対称な2点の組を2本の水平線からそれぞれ
+   作ると、y軸に関して左右対称な等脚台形ができる。 */
+function qParabolaSymQuad(scene){
+  const paras = scene.curves.filter(c=>c.type==='parabola' && !c.unknownParam);
+  if (paras.length===0) return null;
+  for (const para of shuffleArr(paras)){
+    const hlines = scene.curves.filter(c=>c.type==='line' && Math.abs(c.m)<1e-9 && !c.unknownParam);
+    if (hlines.length<2) continue;
+    const pairs = [];
+    for (const hl of hlines){
+      const y = hl.b;
+      const pts = scene.points.filter(p=>p.label && Math.abs(p.y-y)<1e-6 && p.origin && p.origin.kind==='cc' &&
+        ((p.origin.c1===para.id && p.origin.c2===hl.id) || (p.origin.c2===para.id && p.origin.c1===hl.id)));
+      const posP = pts.find(p=>p.x>1e-6), negP = pts.find(p=>p.x<-1e-6);
+      if (!posP || !negP) continue;
+      if (Math.abs(posP.x+negP.x)>1e-6) continue;
+      pairs.push({hl, y, left:negP, right:posP, halfWidth: posP.x});
+    }
+    if (pairs.length<2) continue;
+    for (let i=0;i<pairs.length;i++){
+      for (let j=i+1;j<pairs.length;j++){
+        const L1=pairs[i], L2=pairs[j];
+        if (Math.abs(L1.y-L2.y)<1e-6) continue;
+        const [top,bot] = L1.y>L2.y ? [L1,L2] : [L2,L1];
+        const orderLabels = [top.left.label, top.right.label, bot.right.label, bot.left.label];
+        const orderPts = [[top.left.x,top.left.y],[top.right.x,top.right.y],[bot.right.x,bot.right.y],[bot.left.x,bot.left.y]];
+        const area = shoelace(orderPts);
+        if (!isNice(area,12) || area<1 || area>400) continue;
+        const topW = 2*top.halfWidth, botW = 2*bot.halfWidth, height = top.y-bot.y;
+        return {
+          kind:'symTrap', extraPoints:[], quadPts: orderLabels,
+          curveIdxs:[para.id, top.hl.id, bot.hl.id],
+          prompt: `4点${orderLabels.join('、')}を結んでできる四角形${orderLabels.join('')}の面積を求めなさい。`,
+          final: `${formatNum(area,20)}`,
+          steps: `放物線はy軸に関して対称なグラフなので、直線y=${formatNum(top.y)}との交点${top.left.label}、${top.right.label}はy座標が等しくx座標の符号だけが逆になる。同様に直線y=${formatNum(bot.y)}との交点${bot.left.label}、${bot.right.label}もx座標の符号だけが逆になる。\nよって四角形${orderLabels.join('')}は上底・下底がそれぞれx軸に平行な等脚台形になる。\n上底${top.left.label}${top.right.label}の長さは${formatNum(topW)}、下底${bot.left.label}${bot.right.label}の長さは${formatNum(botW)}、高さ(上底と下底の間の距離)は${formatNum(height)}なので、\n面積=(上底+下底)×高さ÷2=(${formatNum(topW)}+${formatNum(botW)})×${formatNum(height)}÷2=${formatNum(area,20)}。`
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/* ===== (発展)放物線+水平線でできる対称な2点を1本の対角線、y軸上の2点をもう1本の対角線とする「ひし形」 =====
+   対角線が互いの中点で垂直に交わることを利用する(対角線の長さの積の半分が面積になる)。 */
+function qParabolaRhombus(scene){
+  const paras = scene.curves.filter(c=>c.type==='parabola' && !c.unknownParam);
+  const hlines = scene.curves.filter(c=>c.type==='line' && Math.abs(c.m)<1e-9 && !c.unknownParam);
+  if (paras.length===0 || hlines.length===0) return null;
+  const yAxisPts = scene.points.filter(p=>p.label && Math.abs(p.x)<1e-6);
+  if (yAxisPts.length<2) return null;
+  for (const para of shuffleArr(paras)){
+    for (const hl of shuffleArr(hlines)){
+      const k = hl.b;
+      const pts = scene.points.filter(p=>p.label && Math.abs(p.y-k)<1e-6 && p.origin && p.origin.kind==='cc' &&
+        ((p.origin.c1===para.id && p.origin.c2===hl.id) || (p.origin.c2===para.id && p.origin.c1===hl.id)));
+      const posP = pts.find(p=>p.x>1e-6), negP = pts.find(p=>p.x<-1e-6);
+      if (!posP || !negP) continue;
+      if (Math.abs(posP.x+negP.x)>1e-6) continue;
+      const above = yAxisPts.filter(p=>p.y>k+1e-6 && p.label!==posP.label && p.label!==negP.label);
+      const below = yAxisPts.filter(p=>p.y<k-1e-6 && p.label!==posP.label && p.label!==negP.label);
+      for (const U of above){
+        for (const D of below){
+          const dU = U.y-k, dD = k-D.y;
+          if (Math.abs(dU-dD)>1e-6) continue;
+          const diag1 = 2*posP.x, diag2 = U.y-D.y;
+          const area = Math.abs(diag1*diag2)/2;
+          if (!isNice(area,12) || area<1 || area>400) continue;
+          const check = shoelace([[posP.x,posP.y],[U.x,U.y],[negP.x,negP.y],[D.x,D.y]]);
+          if (Math.abs(check-area)>1e-6) continue;
+          const curveIdxs = [para.id, hl.id];
+          [U,D].forEach(P=>{ if (P.origin){ if (P.origin.c1!==undefined) curveIdxs.push(P.origin.c1); if (P.origin.c2!==undefined) curveIdxs.push(P.origin.c2); } });
+          const quadPts = [posP.label, U.label, negP.label, D.label];
+          return {
+            kind:'rhombus', extraPoints:[], quadPts, curveIdxs,
+            prompt: `4点${posP.label}、${U.label}、${negP.label}、${D.label}を結んでできる四角形${posP.label}${U.label}${negP.label}${D.label}はひし形である。この四角形の面積を求めなさい。`,
+            final: `${formatNum(area,20)}`,
+            steps: `放物線はy軸に関して対称なグラフなので、直線y=${formatNum(k)}との交点${negP.label}、${posP.label}はy座標が等しくx座標の符号だけが逆になり、線分${negP.label}${posP.label}の中点はy軸上の点(0, ${formatNum(k)})になる。\nまた、y軸上の点${U.label}${fmtPoint(U.x,U.y)}と${D.label}${fmtPoint(D.x,D.y)}は、点(0, ${formatNum(k)})から上下にそれぞれ${formatNum(dU)}だけ離れているので、線分${U.label}${D.label}の中点も同じ点(0, ${formatNum(k)})になる。\nよって対角線${negP.label}${posP.label}と${U.label}${D.label}は同じ中点を持ち、しかも一方はx軸に平行、もう一方はy軸上(y軸に平行)なので垂直に交わる。対角線が互いの中点で垂直に交わることから、四角形${posP.label}${U.label}${negP.label}${D.label}はひし形であるとわかる。\nひし形の面積は対角線の長さの積の半分なので、\n対角線${negP.label}${posP.label}の長さ=${formatNum(diag1)}、対角線${U.label}${D.label}の長さ=${formatNum(diag2)}より、\n面積=${formatNum(diag1)}×${formatNum(diag2)}÷2=${formatNum(area,20)}。`
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/* ===== (発展)線分AB、BCを2辺とする平行四辺形ABCD(ベクトルによる平行移動) =====
+   平行四辺形ABCDでは対辺ABとDCが平行かつ等しい(ベクトルAB=ベクトルDC)ので、
+   D=A+(C-B)=A+C-B という関係で頂点Dが決まる(A、Bは既存の交点、Cは1本の曲線上を動く点)。
+   対角線ACによって平行四辺形は合同な2つの三角形(△ABCと△ACD)に分けられるので、
+   平行四辺形の面積は常に2×△ABCの面積になる。 */
+function computeParallelogramD(A,B,C){
+  return { x: A.x + C.x - B.x, y: A.y + C.y - B.y };
+}
+function pickParallelogramABHost(scene){
+  const pool = scene.points;
+  // 「四角形は一次関数だけでは出ないように」というルールを満たすため、点Cを置く
+  // host曲線は必ず放物線または反比例に限定する(直線を許すと、A・B・Cが偶然すべて
+  // 直線由来の点になり、四角形全体が一次関数だけで構成されてしまう場合がある)。
+  const hosts = scene.curves.filter(c=>(c.type==='parabola'||c.type==='inverse') && !c.unknownParam);
+  return {pool, hosts};
+}
+function randomHostX(host){
+  if (host.type==='inverse'){
+    const mag = choice([1,2,3,4,5,6,7]);
+    return host.k>0 ? mag : -mag;
+  }
+  if (host.type==='parabola'){
+    return choice([-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7]);
+  }
+  return randInt(-7,7);
+}
+/* 頂点D(=A+C−B)が必ずx軸またはy軸上にのるように、点Cのx座標(host上のパラメータt)を
+   自由に選ぶのではなく、A・Bの座標から逆算して求める。
+   D.x=0(y軸上)にするには t=B.x−A.x、D.y=0(x軸上)にするにはhost上でy座標がB.y−A.yに
+   なるtを解けばよい。「四角形の点は関数上や軸上にあるように」という要件を満たすため、
+   Dをランダムな位置に浮かせず、必ずどちらかの軸に一致するtだけを候補にする。 */
+function pickAxisAlignedHostT(host, A, B){
+  const candidates = [];
+  const tYAxis = B.x - A.x;
+  if (Math.abs(tYAxis) > 1e-9) candidates.push(tYAxis);
+  const targetY = B.y - A.y;
+  if (Math.abs(targetY) > 1e-9){
+    if (host.type==='parabola' && Math.abs(host.a)>1e-9){
+      const ratio = targetY/host.a;
+      if (ratio>1e-9){ const r=Math.sqrt(ratio); candidates.push(r, -r); }
+    } else if (host.type==='inverse'){
+      candidates.push(host.k/targetY);
+    } else if (host.type==='line' && Math.abs(host.m)>1e-9){
+      candidates.push((targetY-host.b)/host.m);
+    }
+  }
+  return shuffleArr(candidates);
+}
+/* (中級/具体的な位置)点Cの座標を具体的に与えて平行四辺形の面積を求める */
+function qParallelogramArea(scene){
+  const {pool, hosts} = pickParallelogramABHost(scene);
+  if (pool.length<2 || hosts.length===0) return null;
+  for (let attempt=0; attempt<250; attempt++){
+    const idxs=[...pool.keys()];
+    const i1=choice(idxs); let i2=choice(idxs);
+    if (i1===i2) continue;
+    const A=pool[i1], B=pool[i2];
+    const host = choice(hosts);
+    for (const t of pickAxisAlignedHostT(host, A, B)){
+    const Cy = curveYatX(host, t);
+    if (!isFinite(Cy)) continue;
+    const C = {x:t, y:Cy};
+    if (Math.abs(C.x-A.x)<1e-9 && Math.abs(C.y-A.y)<1e-9) continue;
+    if (Math.abs(C.x-B.x)<1e-9 && Math.abs(C.y-B.y)<1e-9) continue;
+    if (collinear([A.x,A.y],[B.x,B.y],[C.x,C.y])) continue;
+    const D = computeParallelogramD(A,B,C);
+    if (!isNice(C.x,8) || !isNice(C.y,8)) continue;
+    if (!isNice(D.x,8) || !isNice(D.y,8)) continue;
+    if (Math.abs(D.x)>30 || Math.abs(D.y)>80) continue;
+    // Dは必ずx軸またはy軸上にのっているはず(pickAxisAlignedHostTで逆算したtを使っているため)。
+    // 念のため独立に検証しておく。
+    if (Math.abs(D.x)>1e-6 && Math.abs(D.y)>1e-6) continue;
+    if (pool.some(pp=>pp.label && Math.abs(pp.x-D.x)<1e-6 && Math.abs(pp.y-D.y)<1e-6)) continue;
+    const triArea = shoelace([[A.x,A.y],[B.x,B.y],[C.x,C.y]]);
+    const area = 2*triArea;
+    if (area<2 || area>350 || !isNice(area,12)) continue;
+    const area4 = shoelace([[A.x,A.y],[B.x,B.y],[C.x,C.y],[D.x,D.y]]);
+    if (Math.abs(area4-area)>1e-6) continue;
+    // 新しく作る頂点C・Dには、既存の点(A・Bを含むscene上の全ての点)と衝突しない
+    // 文字を動的に割り振る(既存点が偶然'C'や'D'という文字を使っていても問題ない)。
+    const labels = pickFreshLabels(scene, 2);
+    if (!labels) continue;
+    const [nC, nD] = labels;
+
+    const hostName = host.type==='parabola'?`放物線<span class="mathexpr">${host.a===1?'y=<i>x</i>²':`y=${formatNum(host.a)}<i>x</i>²`}</span>`:host.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(host.k)}/<i>x</i></span>`:`直線${fmtLinear(host.m,host.b)}`;
+    const cIsOrigin = Math.abs(C.x)<1e-9 && Math.abs(C.y)<1e-9;
+    const cDesc = cIsOrigin ? `点${nC}が原点にあるとき、` : `点${nC}の座標が${fmtPoint(C.x,C.y)}であるとき、`;
+
+    return {
+      kind:'parallelogram', extraPoints:[{x:C.x,y:C.y,label:nC},{x:D.x,y:D.y,label:nD}],
+      refLabels:[A.label,B.label], hostIdx: host.id,
+      prompt: `${hostName}上に点${nC}をとる。線分${A.label}${B.label}、${B.label}${nC}を2辺とする平行四辺形${A.label}${B.label}${nC}${nD}をつくる。${cDesc}平行四辺形${A.label}${B.label}${nC}${nD}の面積を求めなさい。`,
+      final: `${formatNum(area,20)}`,
+      steps: `平行四辺形${A.label}${B.label}${nC}${nD}では、辺${A.label}${B.label}と辺${nD}${nC}が平行で長さが等しい(ベクトル${A.label}${B.label}=ベクトル${nD}${nC})ので、頂点${nD}の座標は\n${nD}=${A.label}+${nC}−${B.label}\nという関係から求められる。\n${A.label}${fmtPoint(A.x,A.y)}、${B.label}${fmtPoint(B.x,B.y)}、${nC}${fmtPoint(C.x,C.y)}を代入すると、${nD}${fmtPoint(D.x,D.y)}となる。\n対角線${A.label}${nC}によって平行四辺形は合同な2つの三角形(△${A.label}${B.label}${nC}と△${A.label}${nC}${nD})に分けられるので、\n平行四辺形の面積=2×△${A.label}${B.label}${nC}の面積\nとなる。シューレース公式で△${A.label}${B.label}${nC}の面積を求めると${formatNum(triArea,20)}なので、\n平行四辺形${A.label}${B.label}${nC}${nD}の面積=2×${formatNum(triArea,20)}=${formatNum(area,20)}。`
+    };
+    }
+  }
+  return null;
+}
+/* (上級/逆算)平行四辺形の面積が与えられた値になるように動点Cの位置を求め、頂点Dの座標を(すべて)求める。
+   (2)で具体的な位置のCを使って面積を求めた後、(3)でその面積を目標値として動点Cの位置を逆算する、という
+   2問セットで返す。△ABCの面積をtの式にする部分はqMovingAreaと同じallAreaSolutionsを再利用する。 */
+function buildParallelogramPair(scene){
+  const {pool, hosts} = pickParallelogramABHost(scene);
+  if (pool.length<2 || hosts.length===0) return null;
+  for (let attempt=0; attempt<250; attempt++){
+    const idxs=[...pool.keys()];
+    const i1=choice(idxs); let i2=choice(idxs);
+    if (i1===i2) continue;
+    const A=pool[i1], B=pool[i2];
+    const host = choice(hosts);
+    // Dが必ずx軸またはy軸上にのるtだけを候補にする(qParallelogramAreaと同じ理由)。
+    // (2)のCの具体例sをこの候補群から選ぶことで、実際に図に描かれるDは必ず軸上になる。
+    // (3)で解く一般の面積方程式の解自体は(通常通り)自由な値になってよい(図には描かれないため)。
+    for (const s of pickAxisAlignedHostT(host, A, B)){
+    const Cy = curveYatX(host, s);
+    if (!isFinite(Cy)) continue;
+    const C = {x:s, y:Cy};
+    if (Math.abs(C.x-A.x)<1e-9 && Math.abs(C.y-A.y)<1e-9) continue;
+    if (Math.abs(C.x-B.x)<1e-9 && Math.abs(C.y-B.y)<1e-9) continue;
+    if (collinear([A.x,A.y],[B.x,B.y],[C.x,C.y])) continue;
+    const D = computeParallelogramD(A,B,C);
+    if (!isNice(C.x,8) || !isNice(C.y,8)) continue;
+    if (!isNice(D.x,8) || !isNice(D.y,8)) continue;
+    if (Math.abs(D.x)>30 || Math.abs(D.y)>80) continue;
+    // Dは軸上にのっているはず(pickAxisAlignedHostTで逆算したsを使っているため)。念のため独立に検証。
+    if (Math.abs(D.x)>1e-6 && Math.abs(D.y)>1e-6) continue;
+    if (pool.some(pp=>pp.label && Math.abs(pp.x-D.x)<1e-6 && Math.abs(pp.y-D.y)<1e-6)) continue;
+    const triArea = shoelace([[A.x,A.y],[B.x,B.y],[C.x,C.y]]);
+    const targetArea = 2*triArea;
+    if (targetArea<2 || targetArea>350 || !isNice(targetArea,12)) continue;
+    const area4 = shoelace([[A.x,A.y],[B.x,B.y],[C.x,C.y],[D.x,D.y]]);
+    if (Math.abs(area4-targetArea)>1e-6) continue;
+    const triTarget = targetArea/2;
+
+    const allSolsX = allAreaSolutions(host, [A.x,A.y], [B.x,B.y], triTarget)
+      .filter(x=>isNice(x,4) && Math.abs(x)<20 && (host.type!=='inverse' || Math.abs(x)>0.3));
+    const uniqueSolsX = [...new Set(allSolsX.map(x=>Math.round(x*1e6)/1e6))];
+    if (!uniqueSolsX.some(x=>Math.abs(x-s)<1e-6)) continue;
+    if (uniqueSolsX.length>2) continue;
+
+    const validSolutions = [];
+    for (const x of uniqueSolsX){
+      const cy = curveYatX(host, x);
+      if (!isFinite(cy)) continue;
+      const Ccand = {x, y:cy};
+      if (Math.abs(Ccand.x-A.x)<1e-9 && Math.abs(Ccand.y-A.y)<1e-9) continue;
+      if (Math.abs(Ccand.x-B.x)<1e-9 && Math.abs(Ccand.y-B.y)<1e-9) continue;
+      if (collinear([A.x,A.y],[B.x,B.y],[Ccand.x,Ccand.y])) continue;
+      const Dcand = computeParallelogramD(A,B,Ccand);
+      if (!isNice(Dcand.x,8) || !isNice(Dcand.y,8)) continue;
+      if (Math.abs(Dcand.x)>30 || Math.abs(Dcand.y)>80) continue;
+      const areaCheck = shoelace([[A.x,A.y],[B.x,B.y],[Ccand.x,Ccand.y],[Dcand.x,Dcand.y]]);
+      if (Math.abs(areaCheck-targetArea)>1e-6) continue;
+      validSolutions.push({x, C:Ccand, D:Dcand});
+    }
+    if (!validSolutions.some(v=>Math.abs(v.x-s)<1e-6)) continue;
+    // 新しく作る頂点C・Dには、既存の点(A・Bを含むscene上の全ての点)と衝突しない
+    // 文字を動的に割り振る(既存点が偶然'C'や'D'という文字を使っていても問題ない)。
+    const labels = pickFreshLabels(scene, 2);
+    if (!labels) continue;
+    const [nC, nD] = labels;
+
+    const hostName = host.type==='parabola'?`放物線<span class="mathexpr">${host.a===1?'y=<i>x</i>²':`y=${formatNum(host.a)}<i>x</i>²`}</span>`:host.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(host.k)}/<i>x</i></span>`:`直線${fmtLinear(host.m,host.b)}`;
+
+    const qArea = {
+      kind:'parallelogram', extraPoints:[{x:C.x,y:C.y,label:nC},{x:D.x,y:D.y,label:nD}],
+      refLabels:[A.label,B.label], hostIdx: host.id,
+      prompt: `${hostName}上に点${nC}をとる。線分${A.label}${B.label}、${B.label}${nC}を2辺とする平行四辺形${A.label}${B.label}${nC}${nD}をつくる。点${nC}の座標が${fmtPoint(C.x,C.y)}であるとき、平行四辺形${A.label}${B.label}${nC}${nD}の面積を求めなさい。`,
+      final: `${formatNum(targetArea,20)}`,
+      steps: `平行四辺形${A.label}${B.label}${nC}${nD}では、辺${A.label}${B.label}と辺${nD}${nC}が平行で長さが等しい(ベクトル${A.label}${B.label}=ベクトル${nD}${nC})ので、頂点${nD}の座標は\n${nD}=${A.label}+${nC}−${B.label}\nという関係から求められる。\n${A.label}${fmtPoint(A.x,A.y)}、${B.label}${fmtPoint(B.x,B.y)}、${nC}${fmtPoint(C.x,C.y)}を代入すると、${nD}${fmtPoint(D.x,D.y)}となる。\n対角線${A.label}${nC}によって平行四辺形は合同な2つの三角形(△${A.label}${B.label}${nC}と△${A.label}${nC}${nD})に分けられるので、\n平行四辺形の面積=2×△${A.label}${B.label}${nC}の面積\nとなる。シューレース公式で△${A.label}${B.label}${nC}の面積を求めると${formatNum(triArea,20)}なので、\n平行四辺形${A.label}${B.label}${nC}${nD}の面積=2×${formatNum(triArea,20)}=${formatNum(targetArea,20)}。`
+    };
+
+    const multi = validSolutions.length>=2;
+    const finalStr = validSolutions.map(v=>fmtPoint(v.D.x,v.D.y)).join(' または ');
+    const cExprDesc = host.type==='parabola'?(host.a===1?'<i>t</i>²':`${formatNum(host.a)}<i>t</i>²`):host.type==='inverse'?`${formatNum(host.k)}/<i>t</i>`:fmtLinear(host.m,host.b).replace('y = ','').replace(/<i>x<\/i>/g,'<i>t</i>');
+    const excludedNote = (!multi && uniqueSolsX.length>=2)
+      ? `(もう一方の解は、そのときの点${nC}の位置では平行四辺形が正しくつくれない(3点が一直線上になる、または${nD}の座標が条件に合わない)ため除く。)`
+      : '';
+
+    const qFindD = {
+      kind:'paraFindD', extraPoints:[{x:C.x,y:C.y,label:nC},{x:D.x,y:D.y,label:nD}],
+      refLabels:[A.label,B.label], hostIdx: host.id,
+      prompt: `(2)と同じように、${hostName}上の点${nC}について、線分${A.label}${B.label}、${B.label}${nC}を2辺とする平行四辺形${A.label}${B.label}${nC}${nD}をつくる。この平行四辺形の面積が${formatNum(targetArea,20)}となるとき、点${nD}の座標を求めなさい。${multi?'(考えられるものをすべて答えなさい。)':''}`,
+      final: finalStr,
+      steps: `点${nC}のx座標をtとおくと、<span class="mathexpr">${nC}(<i>t</i>, ${cExprDesc})</span>と表せる。頂点${nD}の座標も${nD}=${A.label}+${nC}−${B.label}の関係からtの式で表せる。\n△${A.label}${B.label}${nC}の面積をtの式で表し(シューレース公式や補助線を用いる方法で求められる)、平行四辺形の面積(△${A.label}${B.label}${nC}の面積の2倍)が${formatNum(targetArea,20)}に等しくなるという方程式を作って解くと、<span class="mathexpr"><i>t</i>=${validSolutions.map(v=>formatNum(v.x)).join('、')}</span>となる。${excludedNote}\nそれぞれのtの値を${nD}=${A.label}+${nC}−${B.label}に代入すると、${finalStr}。`
+    };
+    return {qArea, qFindD};
+    }
+  }
+  return null;
+}
+
+/* ===== (発展)上に開く放物線と下に開く放物線+軸に平行な直線x=tでできる長方形 =====
+   点Aは上に開く放物線とx=tの交点、点Bは下に開く放物線とx=tの交点(いずれも実在する交点)。
+   点A、Bをそれぞれy軸に関して対称移動した点をC、Dとすると、
+   AC・DBはx軸に平行、CD・BAはy軸に平行になるので、長方形ACDBができる。
+   (C、Dは計算のみで求める頂点で、実在する交点としては扱わない。) */
+function qTwoParabolaRect(scene){
+  const parasUp = scene.curves.filter(c=>c.type==='parabola' && c.a>0 && !c.unknownParam);
+  const parasDown = scene.curves.filter(c=>c.type==='parabola' && c.a<0 && !c.unknownParam);
+  const vlines = scene.curves.filter(c=>c.type==='vline' && !c.unknownParam);
+  if (parasUp.length===0 || parasDown.length===0 || vlines.length===0) return null;
+  for (const vl of shuffleArr(vlines)){
+    for (const up of shuffleArr(parasUp)){
+      for (const down of shuffleArr(parasDown)){
+        const A = scene.points.find(p=>p.label && p.origin && p.origin.kind==='cc' &&
+          ((p.origin.c1===up.id && p.origin.c2===vl.id) || (p.origin.c2===up.id && p.origin.c1===vl.id)));
+        const B = scene.points.find(p=>p.label && p.origin && p.origin.kind==='cc' &&
+          ((p.origin.c1===down.id && p.origin.c2===vl.id) || (p.origin.c2===down.id && p.origin.c1===vl.id)));
+        if (!A || !B || A.label===B.label) continue;
+        if (Math.abs(A.x)<1e-9) continue;
+        const t = A.x;
+        // ---- up・downがa2=-a1のx軸対称ペア(mirrorPairId)かどうかを検出する。
+        //      その場合、点Bは点Aをただの「交点探索」で見つけたものであっても、
+        //      down.a===-up.aである以上、数学的にB=(A.x, -A.y)であることが保証されている
+        //      (y=up.a*x²とy=down.a*x²=-up.a*x²はx軸に関して対称なグラフだから)。 ----
+        const isMirrorPair = up.mirrorPairId===down.id && down.mirrorPairId===up.id && Math.abs(up.a+down.a)<1e-9;
+        if (isMirrorPair && Math.abs(B.x-A.x)>1e-9) continue;
+        if (isMirrorPair && Math.abs(B.y+A.y)>1e-9) continue; // 保証されているはずだが念のため独立検証
+        const width = 2*Math.abs(t);
+        const height = Math.abs(A.y-B.y);
+        if (height<1e-6) continue;
+        const area = width*height;
+        if (!isNice(area,12) || area<1 || area>400) continue;
+        const Cx=-A.x, Cy=A.y, Dx=-B.x, Dy=B.y;
+        if (scene.points.some(pp=>pp.label && Math.abs(pp.x-Cx)<1e-6 && Math.abs(pp.y-Cy)<1e-6)) continue;
+        if (scene.points.some(pp=>pp.label && Math.abs(pp.x-Dx)<1e-6 && Math.abs(pp.y-Dy)<1e-6)) continue;
+        const orderPts=[[A.x,A.y],[Cx,Cy],[Dx,Dy],[B.x,B.y]];
+        const areaCheck = Math.abs(shoelace(orderPts));
+        if (Math.abs(areaCheck-area)>1e-6) continue;
+        // 二重対称(x軸対称ペアのとき)の場合、四角形ACDBの重心が原点になっている
+        // (=x軸・y軸のどちらに関しても対称)ことを独立に検証しておく。
+        if (isMirrorPair){
+          const cx4=(A.x+Cx+Dx+B.x)/4, cy4=(A.y+Cy+Dy+B.y)/4;
+          if (Math.abs(cx4)>1e-6 || Math.abs(cy4)>1e-6) continue;
+        }
+        // 新しく作る頂点C・Dには、既存の点(A・Bを含むscene上の全ての点)と衝突しない
+        // 文字を動的に割り振る(既存点が偶然'C'や'D'という文字を使っていても問題ない)。
+        const labels = pickFreshLabels(scene, 2);
+        if (!labels) continue;
+        const [nC, nD] = labels;
+        const upName = describeCurveName(up), downName = describeCurveName(down);
+        let stepsText;
+        if (isMirrorPair){
+          stepsText = `放物線②の係数は放物線①の係数の符号を反転させたものなので、放物線②は放物線①とx軸に関して対称なグラフになっている。よって放物線①上の点${A.label}${fmtPoint(A.x,A.y)}をx軸に関して対称移動した点は、そのまま放物線②上の点になり、これが点${B.label}${fmtPoint(B.x,B.y)}である。\nさらに、点${A.label}、${B.label}をそれぞれy軸に関して対称移動した点を${nC}、${nD}とすると、${nC}${fmtPoint(Cx,Cy)}、${nD}${fmtPoint(Dx,Dy)}となる。\n4点${A.label}、${nC}、${nD}、${B.label}はいずれも原点からx軸方向に${formatNum(Math.abs(t))}、y軸方向に${formatNum(Math.abs(A.y))}だけ離れた位置にあるので、四角形${A.label}${nC}${nD}${B.label}はx軸・y軸のどちらに関しても対称な(原点を中心とする)長方形になる。\n辺${A.label}${nC}、${nD}${B.label}の長さは原点からのx軸方向の距離の2倍で${formatNum(width)}、辺${nC}${nD}、${B.label}${A.label}の長さは原点からのy軸方向の距離の2倍で${formatNum(height)}なので、\n長方形${A.label}${nC}${nD}${B.label}の面積=${formatNum(width)}×${formatNum(height)}=${formatNum(area,20)}\nと、この二重の対称性を使って直接求めることができる。`;
+        } else {
+          stepsText = `点${A.label}${fmtPoint(A.x,A.y)}、点${B.label}${fmtPoint(B.x,B.y)}をそれぞれy軸に関して対称移動すると、${nC}${fmtPoint(Cx,Cy)}、${nD}${fmtPoint(Dx,Dy)}となる。\n辺${A.label}${nC}、${nD}${B.label}はx軸に平行で長さはともに${formatNum(width)}(2点${A.label}、${nC}のx座標の差)、辺${nC}${nD}、${B.label}${A.label}はy軸に平行で長さはともに${formatNum(height)}(2点${A.label}、${B.label}のy座標の差)なので、四角形${A.label}${nC}${nD}${B.label}は長方形になる。\nよって長方形${A.label}${nC}${nD}${B.label}の面積=${formatNum(width)}×${formatNum(height)}=${formatNum(area,20)}。`;
+        }
+        return {
+          kind:'twoParaRect', extraPoints:[{x:Cx,y:Cy,label:nC},{x:Dx,y:Dy,label:nD}],
+          quadPts:[A.label,nC,nD,B.label], refLabels:[A.label,B.label],
+          curveIdxs:[up.id, down.id, vl.id],
+          mirrorPair: isMirrorPair,
+          prompt: `点${A.label}は${upName}上の点、点${B.label}は${downName}上の点で、2点${A.label}、${B.label}のx座標はともに${formatNum(t)}である。2点${A.label}、${B.label}とy軸に関して対称な点をそれぞれ${nC}、${nD}とし、長方形${A.label}${nC}${nD}${B.label}をつくる。長方形${A.label}${nC}${nD}${B.label}の面積を求めなさい。`,
+          final: `${formatNum(area,20)}`,
+          steps: stepsText
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/* ===== ラベルの重複を避けるため、まだ使われていない文字を必要な数だけ確保する =====
+   (今回追加する正方形ABCD・平行四辺形PRSQのSはいずれも「実在する交点」ではなく計算のみで
+   求める頂点なので、既存の点のラベルと衝突しない文字を新たに割り振る。) */
+function pickFreshLabels(scene, n){
+  const used = new Set(scene.points.map(p=>p.label));
+  const prefOrder = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','P','Q','R','S','T','U','V','W'];
+  const avail = prefOrder.filter(l=>!used.has(l));
+  if (avail.length<n) return null;
+  return avail.slice(0,n);
+}
+
+/* ===== (発展)2直線と、軸に平行な2辺をもつ正方形 =====
+   直線L1(y=m1x+b1)上に点Aをとり、辺ABをy軸に平行、辺ADをx軸に平行にした正方形ABCDを考える。
+   B=(a,b)、D=(a+s,Ay)(Ay=m1a+b1)とすると、対角にあるC=(a+s,b)になる。
+   正方形になる条件|AB|=|AD|(=|s|)から b=Ay∓s の2通りがあり、さらに「Cが直線L2(y=m2x+b2)上にある」
+   という条件 b=m2(a+s)+b2 と連立させると、sがaの1次式として求まる(2通りの符号それぞれについて)。
+     b=Ay−s のとき: s=(a(m1−m2)+(b1−b2))/(1+m2)
+     b=Ay+s のとき: s=(a(m1−m2)+(b1−b2))/(m2−1)
+   aときれいな整数・分数になる組を探索する。 */
+function computeSquareOnTwoLines(L1, L2, a){
+  const b1 = L1.b, b2 = L2.b, m1 = L1.m, m2 = L2.m;
+  const Ay = m1*a + b1;
+  const results = [];
+  const denom1 = 1+m2, denom2 = m2-1;
+  if (Math.abs(denom1)>1e-9){
+    const s = (a*(m1-m2) + (b1-b2)) / denom1;
+    results.push({s, b: Ay - s});
+  }
+  if (Math.abs(denom2)>1e-9){
+    const s = (a*(m1-m2) + (b1-b2)) / denom2;
+    results.push({s, b: Ay + s});
+  }
+  const out = [];
+  for (const {s,b} of results){
+    if (Math.abs(s)<1e-6) continue;
+    const A = {x:a, y:Ay}, B = {x:a, y:b}, D = {x:a+s, y:Ay}, C = {x:a+s, y:b};
+    // 独立に検証: 4辺の長さ・4つの角(内積=0)が正方形の条件を満たすことを確認する
+    const AB=[B.x-A.x,B.y-A.y], BC=[C.x-B.x,C.y-B.y], CD=[D.x-C.x,D.y-C.y], DA=[A.x-D.x,A.y-D.y];
+    const len=v=>Math.hypot(v[0],v[1]);
+    const lens=[len(AB),len(BC),len(CD),len(DA)];
+    if (lens.some(L=>L<1e-6)) continue;
+    if (Math.max(...lens)-Math.min(...lens) > 1e-6) continue;
+    const dot=(u,v)=>u[0]*v[0]+u[1]*v[1];
+    if (Math.abs(dot(AB,BC))>1e-6 || Math.abs(dot(BC,CD))>1e-6 || Math.abs(dot(CD,DA))>1e-6 || Math.abs(dot(DA,AB))>1e-6) continue;
+    // Cが本当にL2上にあるかも独立に確認
+    if (Math.abs(C.y-(m2*C.x+b2))>1e-6) continue;
+    const area = lens[0]*lens[0];
+    out.push({A,B,C,D,s,area});
+  }
+  return out;
+}
+function buildSquarePair(scene){
+  // この構成(squareFindX・squareTwoLines)は2本の傾いた直線だけから正方形を作るもので、
+  // 頂点B・Dも実在する交点ではなく座標計算のみで求める点になる。以前は「四角形は
+  // 一次関数だけでは出ないように」「四角形の点は関数上や軸上にあるように」という要望から
+  // 一時的に無効化していたが、ユーザー提供の実際の入試過去問(2直線から正方形ABCDを作り、
+  // 対角線の交点からもう1点を求める形式)で全く同じ構成が使われていることが確認できたため、
+  // 「一次関数のみ」「軸/曲線上にない点」を許容する例外パターンとして復活させる。
+  const lines = scene.curves.filter(c=>c.type==='line' && Math.abs(c.m)>1e-9 && !c.unknownParam);
+  if (lines.length<2) return null;
+  const aCandidates = shuffleArr([1,2,3,4,-1,-2,-3,-4,1/2,-1/2,3/2,-3/2]);
+  for (let li=0; li<lines.length; li++){
+    for (let lj=0; lj<lines.length; lj++){
+      if (li===lj) continue;
+      const L1 = lines[li], L2 = lines[lj];
+      const m1 = L1.m, b1 = L1.b, m2 = L2.m, b2 = L2.b;
+      if (Math.abs(m1-m2)<1e-9) continue; // 平行な直線では正方形が作れない
+      for (const a of aCandidates){
+        if (Math.abs(a)<1e-9) continue;
+        const cands = computeSquareOnTwoLines(L1, L2, a);
+        for (const {A,B,C,D,s,area} of cands){
+          if (![A.x,A.y,B.x,B.y,C.x,C.y,D.x,D.y].every(v=>isNice(v,8))) continue;
+          if ([A.x,A.y,B.x,B.y,C.x,C.y,D.x,D.y].some(v=>Math.abs(v)>25)) continue;
+          if (!isNice(area,12) || area<1 || area>300) continue;
+          // 実在する交点(または原点)と偶然重なる場合は避ける(既存の点と混同するため)
+          const coincidesReal = [A,B,C,D].some(P=>scene.points.some(pp=>pp.label && Math.abs(pp.x-P.x)<1e-6 && Math.abs(pp.y-P.y)<1e-6));
+          if (coincidesReal) continue;
+          const labels = pickFreshLabels(scene, 4);
+          if (!labels) continue;
+          const [nA,nB,nC,nD] = labels;
+          const l1Name = describeCurveName(L1), l2Name = describeCurveName(L2);
+          const l1Eq = fmtLinear(m1, b1), l2Eq = fmtLinear(m2, b2);
+          const sAbs = Math.abs(s);
+
+          const qFindX = {
+            kind:'squareFindX', extraPoints:[{x:A.x,y:A.y,label:nA}],
+            quadPts:[], curveIdxs:[L1.id, L2.id],
+            prompt: `${l1Name}上に点${nA}、${l2Name}上に点${nC}をとる。また辺${nA}${nB}がy軸に平行、辺${nA}${nD}がx軸に平行になるように点${nB}、${nD}をとり、四角形${nA}${nB}${nC}${nD}が正方形になるようにする。点${nA}のy座標が${formatNum(A.y)}であるとき、点${nA}のx座標を求めなさい。`,
+            final: `${formatNum(a)}`,
+            steps: `点${nA}は直線${l1Eq}上の点なので、その式に点${nA}のy座標${formatNum(A.y)}を代入して方程式を作る。\n${formatNum(A.y)}=${formatNum(m1)}×(${nA}のx座標)${b1===0?'':(b1>0?'+'+formatNum(b1):'−'+formatNum(Math.abs(b1)))}\nを${nA}のx座標について解くと、x=${formatNum(a)}となる。\nよって点${nA}${fmtPoint(a,A.y)}。`
+          };
+
+          const qArea = {
+            kind:'squareTwoLines', extraPoints:[{x:A.x,y:A.y,label:nA},{x:B.x,y:B.y,label:nB},{x:C.x,y:C.y,label:nC},{x:D.x,y:D.y,label:nD}],
+            quadPts:[], curveIdxs:[L1.id, L2.id], squareLabels:[nA,nB,nC,nD],
+            prompt: `正方形${nA}${nB}${nC}${nD}の面積を求めなさい。`,
+            final: `${formatNum(area,20)}`,
+            steps: `点${nA}${fmtPoint(A.x,A.y)}とする。辺${nA}${nB}はy軸に平行、辺${nA}${nD}はx軸に平行なので、点${nD}のx座標を${formatNum(A.x)}+t(t=辺の長さを表す文字)とおくと、点${nD}${fmtPoint(D.x,D.y)}、点${nB}${fmtPoint(B.x,B.y)}、点${nC}${fmtPoint(C.x,C.y)}となる。\n点${nC}が${l2Name}上にあるという条件から方程式を作って解くと、正方形の1辺の長さは${formatNum(sAbs)}とわかる。\nよって正方形${nA}${nB}${nC}${nD}の面積=${formatNum(sAbs)}×${formatNum(sAbs)}=${formatNum(area,20)}。`
+          };
+          return {qFindX, qArea};
+        }
+      }
+    }
+  }
+  return null;
+}
+/* 傾いた直線が2本あれば(nLineが2以上ならほぼ毎回)成立してしまう構成なので、twoParaRectと
+   違って「まれな特殊構成だから優先する」という理由づけはできない。採用率を高くしすぎると
+   正方形ばかりになり、平行四辺形・ひし形など他の四角形が出にくくなるため、控えめにする。 */
+function trySquareTwoLines(scene, q1, shapePref){
+  if (shapePref==='triangle') return null;
+  const pair = buildSquarePair(scene);
+  if (!pair || pair.qFindX.kind===q1.kind) return null;
+  if (Math.random()<(shapePref==='quad' ? 0.25 : 0.15)){
+    return [pair.qFindX, pair.qArea];
+  }
+  return null;
+}
+
+/* ===== (発展)放物線上のy軸対称な2点P,Qと、同じ放物線上の別の点Rから、
+   平行四辺形PRSQ(頂点順)をつくる =====
+   平行四辺形PRSQでは、辺PRと辺QSが対辺(平行かつ等しい)なので、
+   ベクトルRS=ベクトルPQ ではなく、頂点順の対角関係からS=P+S...ではなく、
+   既存のcomputeParallelogramD(A,B,C)=A+C−B と同じ考え方をP,R,S,Qの順(A→B→C→D)に当てはめると、
+   Q=P+S−R つまり S=Q−P+R=R+(Q−P) という関係になる。
+   (P,Q,Rはいずれも放物線上の実在する交点、Sは計算のみで求める頂点。) */
+function qAsymParallelogramPRSQ(scene){
+  const paras = scene.curves.filter(c=>c.type==='parabola' && !c.unknownParam);
+  if (paras.length===0) return null;
+  for (const para of shuffleArr(paras)){
+    const hlines = scene.curves.filter(c=>c.type==='line' && Math.abs(c.m)<1e-9 && !c.unknownParam);
+    for (const hl of shuffleArr(hlines)){
+      const k = hl.b;
+      const pts = scene.points.filter(p=>p.label && Math.abs(p.y-k)<1e-6 && p.origin && p.origin.kind==='cc' &&
+        ((p.origin.c1===para.id && p.origin.c2===hl.id) || (p.origin.c2===para.id && p.origin.c1===hl.id)));
+      const posP = pts.find(p=>p.x>1e-6), negP = pts.find(p=>p.x<-1e-6);
+      if (!posP || !negP) continue;
+      if (Math.abs(posP.x+negP.x)>1e-6) continue;
+      const P = negP, Q = posP;
+      const rCandidates = scene.points.filter(p=>p.label && p.origin && p.origin.kind==='cc' &&
+        (p.origin.c1===para.id || p.origin.c2===para.id) &&
+        p.label!==P.label && p.label!==Q.label && Math.abs(p.x)>1e-6 && Math.abs(p.y-k)>1e-6);
+      for (const R of shuffleArr(rCandidates)){
+        const Sx = R.x + Q.x - P.x, Sy = R.y + Q.y - P.y;
+        if (!isNice(Sx,8) || !isNice(Sy,8)) continue;
+        if (Math.abs(Sx)>30 || Math.abs(Sy)>80) continue;
+        if (collinear([P.x,P.y],[R.x,R.y],[Q.x,Q.y])) continue;
+        // 対辺が平行かつ等しいことを独立に検証(ベクトルPR=ベクトルQS)
+        const PR=[R.x-P.x,R.y-P.y], QS=[Sx-Q.x,Sy-Q.y];
+        if (Math.abs(PR[0]-QS[0])>1e-6 || Math.abs(PR[1]-QS[1])>1e-6) continue;
+        const RS=[Sx-R.x,Sy-R.y], PQ=[Q.x-P.x,Q.y-P.y];
+        if (Math.abs(RS[0]-PQ[0])>1e-6 || Math.abs(RS[1]-PQ[1])>1e-6) continue;
+        if (scene.points.some(pp=>pp.label && Math.abs(pp.x-Sx)<1e-6 && Math.abs(pp.y-Sy)<1e-6)) continue;
+        const area = shoelace([[P.x,P.y],[R.x,R.y],[Sx,Sy],[Q.x,Q.y]]);
+        if (!isNice(area,12) || area<2 || area>350) continue;
+        const labels = pickFreshLabels(scene, 1);
+        if (!labels) continue;
+        const [nS] = labels;
+        const paraName = describeCurveName(para);
+        const otherIdxs = [];
+        if (R.origin.c1!==undefined) otherIdxs.push(R.origin.c1);
+        if (R.origin.c2!==undefined) otherIdxs.push(R.origin.c2);
+        const triPRQ = shoelace([[P.x,P.y],[R.x,R.y],[Q.x,Q.y]]);
+        return {
+          kind:'asymPara', extraPoints:[{x:Sx,y:Sy,label:nS}],
+          quadPts:[P.label, R.label, nS, Q.label], curveIdxs:[para.id, hl.id, ...otherIdxs],
+          prompt: `${paraName}上に、y軸に関して対称な2点${P.label}、${Q.label}(${P.label}のx座標は負、${Q.label}のx座標は正)と、別の点${R.label}をとる。線分${P.label}${R.label}、${Q.label}${nS}が対辺になるように点${nS}をとり、平行四辺形${P.label}${R.label}${nS}${Q.label}をつくる。この平行四辺形の面積を求めなさい。`,
+          final: `${formatNum(area,20)}`,
+          steps: `平行四辺形${P.label}${R.label}${nS}${Q.label}では、辺${P.label}${R.label}と辺${Q.label}${nS}が平行で長さが等しい(ベクトル${P.label}${R.label}=ベクトル${Q.label}${nS})ので、頂点${nS}の座標は\n${nS}=${R.label}+${Q.label}−${P.label}\nという関係から求められる。\n${P.label}${fmtPoint(P.x,P.y)}、${R.label}${fmtPoint(R.x,R.y)}、${Q.label}${fmtPoint(Q.x,Q.y)}を代入すると、${nS}${fmtPoint(Sx,Sy)}となる。\n対角線${R.label}${Q.label}によって平行四辺形は合同な2つの三角形(△${P.label}${R.label}${Q.label}と△${R.label}${nS}${Q.label})に分けられるので、\n平行四辺形の面積=2×△${P.label}${R.label}${Q.label}の面積\nとなる。シューレース公式で△${P.label}${R.label}${Q.label}の面積を求めると${formatNum(triPRQ,20)}なので、\n平行四辺形${P.label}${R.label}${nS}${Q.label}の面積=2×${formatNum(triPRQ,20)}=${formatNum(area,20)}。`
+        };
+      }
+    }
+  }
+  return null;
+}
+
+const PRIORITY = ['movArea','movLength','intersect','bisect','quad','area','line2pt','range','symTrap','rhombus','twoParaRect','asymPara'];
+
+/* ===== (2)と(3)を連携させる: (2)で交点Pを求め、(3)でそのPを使って三角形の面積を求める ===== */
+function pickTrianglePartners(pool, x0, y0, tries){
+  let result = null;
+  for (let t2=0; t2<tries && !result; t2++){
+    const idxs=[...pool.keys()];
+    const i1=choice(idxs); let i2=choice(idxs);
+    if (i1===i2) continue;
+    const p2=pool[i1], p3=pool[i2];
+    if (collinear([x0,y0],[p2.x,p2.y],[p3.x,p3.y])) continue;
+    const area = shoelace([[x0,y0],[p2.x,p2.y],[p3.x,p3.y]]);
+    if (area<1 || area>300 || !isNice(area,12)) continue;
+    result = {p2,p3,area};
+  }
+  return result;
+}
+function buildChainPair(scene, q1){
+  const allCurves = scene.curves.filter(c=>!c.unknownParam);
+  if (allCurves.length<2) return null;
+  const pairs=[];
+  for (let i=0;i<allCurves.length;i++) for (let j=i+1;j<allCurves.length;j++) pairs.push([allCurves[i],allCurves[j]]);
+  if (pairs.length===0) return null;
+  for (let i=pairs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pairs[i],pairs[j]]=[pairs[j],pairs[i]]; }
+  // (1)がすでに参照している点があれば、(3)の三角形にもそれを再利用し、
+  // (1)とは無関係な点だけのために曲線が残ってしまうケースを減らす。
+  const q1Labels = q1 ? new Set([q1.p1Label, q1.p2Label, ...(q1.refLabels||[]), ...(q1.trianglePts||[])].filter(Boolean)) : new Set();
+
+  for (const [cA,cB] of pairs){
+    const allSols = intersectCurves(cA,cB);
+    const sols = allSols.filter(([x,y])=>isNice(x,4)&&isNice(y,4)&&Math.abs(x)<20&&Math.abs(y)<60&&(Math.abs(x)>0.4||Math.abs(y)>0.4));
+    if (sols.length===0) continue;
+    for (const [x0,y0] of sols){
+      const basePool = scene.points.filter(p=>!(Math.abs(p.x-x0)<1e-6 && Math.abs(p.y-y0)<1e-6));
+      if (basePool.length<2) continue;
+      const preferredPool = q1Labels.size>0 ? basePool.filter(p=>q1Labels.has(p.label)) : [];
+      let triangleResult = preferredPool.length>=2 ? pickTrianglePartners(preferredPool, x0, y0, 25) : null;
+      if (!triangleResult) triangleResult = pickTrianglePartners(basePool, x0, y0, 25);
+      if (!triangleResult) continue;
+      const {p2,p3,area} = triangleResult;
+
+      const nameOf = c => c.type==='parabola'?`放物線<span class="mathexpr">${c.a===1?'y=<i>x</i>²':`y=${formatNum(c.a)}<i>x</i>²`}</span>`:c.type==='vline'?`直線<span class="mathexpr"><i>x</i>=${formatNum(c.x)}</span>`:c.type==='inverse'?`反比例<span class="mathexpr">y=${formatNum(c.k)}/<i>x</i></span>`:`直線${fmtLinear(c.m,c.b)}`;
+      const eqOf = c => c.type==='parabola'?(c.a===1?'<i>x</i>²':`${formatNum(c.a)}<i>x</i>²`):c.type==='inverse'?`${formatNum(c.k)}/<i>x</i>`:c.type==='vline'?null:fmtLinear(c.m,c.b).replace('y = ','');
+      const needsQualifier = allSols.length >= 2;
+      const qualifier = needsQualifier ? `のうち、x座標が${x0<0?'負':'正'}である点を` : 'である点を';
+
+      let stepDetail;
+      if (cA.type==='vline' || cB.type==='vline'){
+        const vl = cA.type==='vline'?cA:cB, other = cA.type==='vline'?cB:cA;
+        stepDetail = `直線x=${formatNum(vl.x)}上の点なので、x=${formatNum(vl.x)}を${nameOf(other)}の式に代入すると、\ny=${eqOf(other)}にx=${formatNum(vl.x)}を代入してy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+      } else if (cA.type==='line' && cB.type==='line'){
+        stepDetail = `2つの直線の式 y=${eqOf(cA)} と y=${eqOf(cB)} を連立させる。\n${eqOf(cA)}=${eqOf(cB)}を解いてxを求めると、x=${formatNum(x0)}。\nこれをどちらかの式に代入するとy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+      } else {
+        const curveEq = cA.type!=='line' ? cA : cB;
+        const lineEq = cA.type==='line' ? cA : cB;
+        stepDetail = `${nameOf(curveEq)}と${nameOf(lineEq)}を連立させる。\ny=${eqOf(curveEq)}とy=${eqOf(lineEq)}が等しいとおくと、${eqOf(curveEq)}=${eqOf(lineEq)}という方程式ができる。\nこれを整理して2次方程式を解くと、x=${formatNum(x0)}(もう1つの解は求める点と異なるので除く)。\nこれを代入するとy=${formatNum(y0)}。よってP${fmtPoint(x0,y0)}。`;
+      }
+
+      const qLink = {
+        kind:'intersect', extraPoints:[{x:x0,y:y0,label:'P'}],
+        curveIdxs:[cA.id, cB.id],
+        prompt: `${nameOf(cA)}と${nameOf(cB)}の交点${qualifier}Pとする。点Pの座標を求めなさい。`,
+        final: fmtPoint(x0,y0),
+        steps: stepDetail
+      };
+      const qUse = {
+        kind:'areaChain', extraPoints:[{x:x0,y:y0,label:'P'}], trianglePts:['P',p2.label,p3.label],
+        prompt: `(2)で求めた点Pと、2点${p2.label}、${p3.label}を結んでできる三角形の面積を求めなさい。`,
+        final: `${formatNum(area,20)}`,
+        steps: `(2)で求めたP${fmtPoint(x0,y0)}と、${p2.label}${fmtPoint(p2.x,p2.y)}、${p3.label}${fmtPoint(p3.x,p3.y)}とする。\nシューレース公式(座標から直接面積を求める公式)を使うと、\n面積=(1/2)|x座標とy座標を順にかけて引く計算|に座標を代入して計算すると、面積=${formatNum(area,20)}となる。`
+      };
+      return {qLink, qUse};
+    }
+  }
+  return null;
+}
+
+/* ===== 面積が絡む設問の図形(三角形/四角形)による絞り込み =====
+   三角形になる設問(kind)と四角形になる設問(kind)を分類し、shapePrefに応じて使ってよい
+   設問kindだけを残す。shapePrefが'either'(指定なし)のときは従来通り絞り込みなし。 */
+const TRIANGLE_SHAPE_KINDS = ['area','bisect','bisectArea','areaChain','movArea'];
+const QUAD_SHAPE_KINDS = ['quad','symTrap','rhombus','parallelogram','paraFindD','twoParaRect','squareFindX','squareTwoLines','asymPara'];
+// symTrap(等脚台形)・rhombus(ひし形)・parallelogram/paraFindD(平行四辺形)・twoParaRect(2つの放物線でできる長方形)は、
+// 4点をランダムに選ぶだけの汎用qQuadAreaより構造が豊かな「特殊構成」。
+// shapePref==='quad'のとき、これらをできるだけ優先して使う。
+const QUAD_PRIORITY = ['symTrap','rhombus','asymPara','quad','twoParaRect','squareTwoLines','movArea','movLength','intersect','bisect','area','line2pt','range'];
+function shapeAllowed(kind, shapePref){
+  if (shapePref==='triangle') return !QUAD_SHAPE_KINDS.includes(kind);
+  if (shapePref==='quad') return !TRIANGLE_SHAPE_KINDS.includes(kind);
+  // 「平行四辺形」「ひし形」を個別に指定したときは、四角形設問はその図形自身の種類のkindだけを許可する
+  // (基本計算kind(range/line2pt/intersect/findParam)はQUAD_SHAPE_KINDSに含まれないのでそのまま通る)。
+  if (shapePref==='parallelogram') return !TRIANGLE_SHAPE_KINDS.includes(kind) && (!QUAD_SHAPE_KINDS.includes(kind) || kind==='parallelogram' || kind==='paraFindD');
+  if (shapePref==='rhombus') return !TRIANGLE_SHAPE_KINDS.includes(kind) && (!QUAD_SHAPE_KINDS.includes(kind) || kind==='rhombus');
+  return true;
+}
+function pickOthersPool(scene){
+  return {
     range: qRange(scene), line2pt: qLineThrough2(scene),
     area: qTriangleArea(scene), bisect: qBisectMedian(scene),
     intersect: qIntersectionGeneral(scene), quad: qQuadArea(scene),
-    movArea: qMovingArea(scene), movLength: qMovingLength(scene)
+    movArea: qMovingArea(scene), movLength: qMovingLength(scene),
+    symTrap: qParabolaSymQuad(scene), rhombus: qParabolaRhombus(scene),
+    twoParaRect: qTwoParabolaRect(scene), asymPara: qAsymParallelogramPRSQ(scene)
   };
-  const usable = Object.entries(results).filter(([k,v])=>v!==null);
-  if (usable.length < 3) return null;
-  let closingKey = PRIORITY.find(k=>results[k]!==null);
+}
+/* ===== 設問が参照する点・曲線の集合(=シーン上でその設問と「繋がっている」もの)を取り出す =====
+   (1)や直前の設問と同じ点・曲線を共有していれば、その設問群は互いに関連していると見なせる。 */
+function questionRefs(q){
+  const points = new Set();
+  const curves = new Set();
+  if (!q) return {points, curves};
+  if (q.p1Label) points.add(q.p1Label);
+  if (q.p2Label) points.add(q.p2Label);
+  if (q.trianglePts) q.trianglePts.forEach(l=>points.add(l));
+  if (q.quadPts) q.quadPts.forEach(l=>points.add(l));
+  if (q.refLabels) q.refLabels.forEach(l=>points.add(l));
+  if (q.extraPoints) q.extraPoints.forEach(p=>{ if (p && p.label) points.add(p.label); });
+  if (q.curveIdx!==undefined) curves.add(q.curveIdx);
+  if (q.curveIdxs) q.curveIdxs.forEach(i=>curves.add(i));
+  if (q.hostIdx!==undefined) curves.add(q.hostIdx);
+  return {points, curves};
+}
+function refsOverlap(a, b){
+  for (const p of a.points) if (b.points.has(p)) return true;
+  for (const c of a.curves) if (b.curves.has(c)) return true;
+  return false;
+}
+/* ===== usable(=[kind,question]の配列)の中から、(1)や互いに繋がりのある2問を優先して選ぶ =====
+   a) (2)が(1)と繋がり、かつ(3)が(1)または(2)と繋がる組み合わせ
+   b) どちらか一方だけでも繋がる組み合わせ
+   のうち、繋がりの数が最大のものを選ぶ。同数の場合はpriorityListの順を使って
+   従来の「特殊構成を優先する」挙動をタイブレークとして残す。
+   繋がりが全く見つからない場合はnullを返し、呼び出し元は従来のフォールバックに委ねる。 */
+function selectConnectedPair(usable, q1, priorityList){
+  if (!usable || usable.length<2) return null;
+  const q1Refs = questionRefs(q1);
+  let best = null;
+  for (let i=0;i<usable.length;i++){
+    for (let j=0;j<usable.length;j++){
+      if (i===j) continue;
+      const [k2,cand2] = usable[i];
+      const [k3,cand3] = usable[j];
+      const refs2 = questionRefs(cand2);
+      const refs3 = questionRefs(cand3);
+      const q2ConnectsQ1 = refsOverlap(refs2, q1Refs);
+      const q3ConnectsQ1orQ2 = refsOverlap(refs3, q1Refs) || refsOverlap(refs3, refs2);
+      const score = (q2ConnectsQ1?1:0) + (q3ConnectsQ1orQ2?1:0);
+      if (score===0) continue;
+      if (!best || score>best.score){
+        best = {second:cand2, closing:cand3, score, key3:k3};
+      } else if (score===best.score){
+        const curP = priorityList.indexOf(best.key3); const candP = priorityList.indexOf(k3);
+        const curRank = curP===-1?Infinity:curP, candRank = candP===-1?Infinity:candP;
+        if (candRank<curRank) best = {second:cand2, closing:cand3, score, key3:k3};
+      }
+    }
+  }
+  if (!best) return null;
+  return [best.second, best.closing];
+}
+function pickSingleOther(scene, excludeKinds, shapePref){
+  const usable = Object.values(pickOthersPool(scene)).filter(v=>v && !excludeKinds.includes(v.kind) && shapeAllowed(v.kind, shapePref));
+  if (usable.length===0) return null;
+  return choice(usable);
+}
+function pickTwoOthers(scene, excludeKinds, shapePref){
+  const usable = Object.values(pickOthersPool(scene)).filter(v=>v && !excludeKinds.includes(v.kind) && shapeAllowed(v.kind, shapePref));
+  if (usable.length<2) return null;
+  return shuffleArr(usable).slice(0,2);
+}
+/* ===== (1)は必ず基本計算(座標・2点を通る直線・交点・変域・a・kを求める、のいずれか)にする =====
+   面積・二等分・動点の長さなど、複数手順や条件処理を要する設問はここでは選ばない。 */
+const BASIC_KINDS = ['range','line2pt','intersect','findParam'];
+function pickBasicQuestion(scene, excludeKinds){
+  excludeKinds = excludeKinds || [];
+  const candidates = [];
+  const r = qRange(scene); if (r && !excludeKinds.includes(r.kind)) candidates.push(r);
+  const l2 = qLineThrough2(scene); if (l2 && !excludeKinds.includes(l2.kind)) candidates.push(l2);
+  const ig = qIntersectionGeneral(scene); if (ig && !excludeKinds.includes(ig.kind)) candidates.push(ig);
+  if (candidates.length===0) return null;
+  return choice(candidates);
+}
+/* ===== 放物線の対称性を利用した四角形(等脚台形・ひし形)は、buildChainPair等の他の設問に
+   埋もれてほとんど出題されなくなってしまうため、使える場面では一定確率で優先的に採用する ===== */
+function tryParabolaSymmetry(scene, q1, shapePref){
+  // symTrap・rhombusはいずれも四角形の設問なので、三角形指定(shapePref==='triangle')のときは使わない。
+  if (shapePref==='triangle') return null;
+  // 四角形指定のときは、シーンが対応していればほぼ必ずこの特殊構成(等脚台形・ひし形)を使う。
+  if (Math.random()<(shapePref==='quad' ? 0.95 : 0.75)){
+    const cands = shuffleArr([qParabolaSymQuad(scene), qParabolaRhombus(scene)].filter(v=>v && v.kind!==q1.kind));
+    for (const closing of cands){
+      const second = pickSingleOther(scene, [closing.kind, q1.kind], shapePref);
+      if (second) return [second, closing];
+    }
+  }
+  return null;
+}
+/* ===== 2つの放物線(上に開く・下に開く)+軸に平行な直線でできる長方形は、成立する場面自体が
+   比較的まれ(2つの放物線+その両方に交わる軸に平行な直線)なので、成立する場面では
+   parallelogram等の他の設問に埋もれてしまわないよう、一定確率で優先的に採用する。
+   ただし採用率が高すぎると、放物線を2個指定した場合などに長方形ばかりになり、
+   平行四辺形・ひし形など他の四角形が出にくくなってしまうため、確率は控えめにする。 */
+function tryTwoParaRect(scene, q1, shapePref){
+  if (shapePref==='triangle') return null;
+  const rect = qTwoParabolaRect(scene);
+  if (!rect || rect.kind===q1.kind) return null;
+  if (Math.random()<(shapePref==='quad' ? 0.15 : 0.1)){
+    const second = pickSingleOther(scene, [rect.kind, q1.kind], shapePref);
+    if (second) return [second, rect];
+  }
+  return null;
+}
+/* ===== shapePrefが'parallelogram'または'rhombus'のときは、他の特殊構成(長方形・等脚台形・
+   鎖状連携など)を一切試さず、指定された図形のみを強制的に採用する。この場面で作れない場合は
+   nullを返し、呼び出し元(generateProblem)が別のシーンで再試行する。 ===== */
+function forceSpecificQuadShape(scene, q1, shapePref){
+  if (shapePref==='parallelogram'){
+    const pgPair = buildParallelogramPair(scene);
+    if (pgPair && pgPair.qArea.kind!==q1.kind) return [q1, pgPair.qArea, pgPair.qFindD];
+    return null;
+  }
+  if (shapePref==='rhombus'){
+    const rh = qParabolaRhombus(scene);
+    if (!rh || rh.kind===q1.kind) return null;
+    const second = pickSingleOther(scene, [rh.kind, q1.kind], shapePref);
+    if (second) return [q1, second, rh];
+    return null;
+  }
+  return undefined;
+}
+function pickQuestions(scene, difficulty, shapePref){
+  difficulty = difficulty || 'easy';
+  shapePref = shapePref || 'either';
+  // buildAreaBisectPair(中線とは異なる面積2等分ペア)は三角形しか作れない構成なので、
+  // 四角形指定(shapePref==='quad')のときはこのペアは使わず、後段の候補(qQuadArea等)に委ねる。
+  const areaBisectPairUsable = shapePref !== 'quad';
+  // buildChainPair の(3)は必ず三角形の面積になる構成なので、四角形指定のときは使わない。
+  const chainPairUsable = shapePref !== 'quad';
+  // buildParallelogramPair(平行四辺形の面積→逆算でDを求める)は四角形の設問なので、三角形指定のときは使わない。
+  const parallelogramPairUsable = shapePref !== 'triangle';
+  if (scene.hidden){
+    const clearHidden = () => {
+      const H = scene.curves.find(c=>c.id===scene.hidden.curveId);
+      if (H) H.unknownParam = false;
+      scene.hidden = null;
+    };
+    const q1 = qFindParam(scene);
+    if (!q1){
+      clearHidden();
+    } else if (shapePref==='parallelogram' || shapePref==='rhombus'){
+      return forceSpecificQuadShape(scene, q1, shapePref);
+    } else {
+      // 2つの放物線でできる長方形(twoParaRect)は成立する場面自体がまれな特殊構成なので、
+      // parallelogram等の他の設問に埋もれないよう、難易度分岐より先に優先的に採用を試みる。
+      const rectEarly = tryTwoParaRect(scene, q1, shapePref);
+      if (rectEarly) return [q1, rectEarly[0], rectEarly[1]];
+      const sqEarly = trySquareTwoLines(scene, q1, shapePref);
+      if (sqEarly) return [q1, sqEarly[0], sqEarly[1]];
+      // 難易度は scene.hidden で強制されるQ1(a・kを求める設問、これも基本計算に含まれる)より後の枠に適用する
+      if (difficulty==='medium' && areaBisectPairUsable){
+        const pair = buildAreaBisectPair(scene);
+        if (pair) return [q1, pair.qArea, pair.qBisect];
+      }
+      if (difficulty==='hard'){
+        if (parallelogramPairUsable && Math.random()<(shapePref==='quad' ? 0.8 : 0.4)){
+          const pgPair = buildParallelogramPair(scene);
+          if (pgPair) return [q1, pgPair.qArea, pgPair.qFindD];
+        }
+        const qLen = qLengthGivenTarget(scene);
+        if (qLen){
+          const second = pickSingleOther(scene, ['lenTarget'], shapePref);
+          if (second) return [q1, second, qLen];
+        }
+      }
+      const sym = tryParabolaSymmetry(scene, q1, shapePref);
+      if (sym) return [q1, sym[0], sym[1]];
+      if (chainPairUsable){
+        const chain = buildChainPair(scene, q1);
+        if (chain){
+          return [q1, chain.qLink, chain.qUse];
+        }
+      }
+      const others = pickOthersPool(scene);
+      const usableEntries = Object.entries(others).filter(([k,v])=>v!==null && shapeAllowed(k, shapePref));
+      if (usableEntries.length>=2){
+        const priorityListHidden = shapePref==='quad' ? QUAD_PRIORITY : PRIORITY;
+        const connectedPairHidden = selectConnectedPair(usableEntries, q1, priorityListHidden);
+        if (connectedPairHidden) return [q1, connectedPairHidden[0], connectedPairHidden[1]];
+        for (let i=usableEntries.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [usableEntries[i],usableEntries[j]]=[usableEntries[j],usableEntries[i]]; }
+        return [q1, ...usableEntries.slice(0,2).map(([k,v])=>v)];
+      }
+      // 十分な設問が作れない場合は、隠す機能自体を諦めて通常の出題に戻す
+      clearHidden();
+    }
+  }
+  // (1)は常に基本計算(座標・直線・交点・変域)から選ぶ。作れないシーンはここで諦め、
+  // 呼び出し元(generateProblem)が別のシーンで再試行する。
+  const q1 = pickBasicQuestion(scene, []);
+  if (!q1) return null;
+  if (shapePref==='parallelogram' || shapePref==='rhombus'){
+    return forceSpecificQuadShape(scene, q1, shapePref);
+  }
+  // 2つの放物線でできる長方形(twoParaRect)は成立する場面自体がまれな特殊構成なので、
+  // parallelogram等の他の設問に埋もれないよう、難易度分岐より先に優先的に採用を試みる。
+  const rectEarly2 = tryTwoParaRect(scene, q1, shapePref);
+  if (rectEarly2) return [q1, rectEarly2[0], rectEarly2[1]];
+  const sqEarly2 = trySquareTwoLines(scene, q1, shapePref);
+  if (sqEarly2) return [q1, sqEarly2[0], sqEarly2[1]];
+  if (difficulty==='medium' && areaBisectPairUsable){
+    const pair = buildAreaBisectPair(scene);
+    if (pair) return [q1, pair.qArea, pair.qBisect];
+  }
+  if (difficulty==='hard'){
+    if (parallelogramPairUsable && Math.random()<(shapePref==='quad' ? 0.8 : 0.4)){
+      const pgPair = buildParallelogramPair(scene);
+      if (pgPair && pgPair.qArea.kind!==q1.kind) return [q1, pgPair.qArea, pgPair.qFindD];
+    }
+    const qLen = qLengthGivenTarget(scene);
+    if (qLen){
+      let q2 = shapePref==='quad' ? null : qTriangleArea(scene);
+      if (!q2) q2 = pickSingleOther(scene, ['lenTarget', q1.kind], shapePref);
+      if (q2) return [q1, q2, qLen];
+    }
+  }
+  const sym = tryParabolaSymmetry(scene, q1, shapePref);
+  if (sym) return [q1, sym[0], sym[1]];
+  if (chainPairUsable){
+    const chain = buildChainPair(scene, q1);
+    if (chain && chain.qLink.kind !== q1.kind){
+      return [q1, chain.qLink, chain.qUse];
+    }
+  }
+  const results = pickOthersPool(scene);
+  const usable = Object.entries(results).filter(([k,v])=>v!==null && k!==q1.kind && shapeAllowed(k, shapePref));
+  if (usable.length < 2) return null;
+  const priorityList = shapePref==='quad' ? QUAD_PRIORITY : PRIORITY;
+  const connectedPair = selectConnectedPair(usable, q1, priorityList);
+  if (connectedPair) return [q1, connectedPair[0], connectedPair[1]];
+  let closingKey = priorityList.find(k=>usable.some(([kk])=>kk===k));
   const remaining = usable.filter(([k])=>k!==closingKey);
   for (let i=remaining.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [remaining[i],remaining[j]]=[remaining[j],remaining[i]]; }
-  return [...remaining.slice(0,2).map(([k,v])=>v), results[closingKey]];
+  return [q1, ...remaining.slice(0,1).map(([k,v])=>v), results[closingKey]];
 }
-function generateProblem(config, desiredPoints){
+/* pinnedフィールド(configSpecでランダム('random')ではなく固定された項目)については、
+   pruneScene後(=実際に印刷される場面)のcurve本数が指定値と厳密に一致することを確認する。
+   buildScene直後は指定本数ぴったりでも、pruneSceneが「3つの設問のどれからも参照されない
+   curve」を削除してしまうため、剪定後に本数が変わってしまうことがある
+   (「放物線の個数を指定しても従ってもらえない」バグの原因)。 */
+function pinnedCurveCountsOk(configSpec, scene){
+  if (configSpec.nPara!=='random'){
+    const n = scene.curves.filter(c=>c.type==='parabola').length;
+    if (n!==configSpec.nPara) return false;
+  }
+  if (configSpec.nLine!=='random'){
+    // 傾きのある直線(一次関数)。nAxisLineが生成する水平線(m=0)はここには含めない。
+    const n = scene.curves.filter(c=>c.type==='line' && Math.abs(c.m)>1e-9).length;
+    if (n!==configSpec.nLine) return false;
+  }
+  if (configSpec.nAxisLine!=='random'){
+    // 軸に平行な直線はvline(x=定数)またはline且つm=0(y=定数)の2種類で表現される。
+    const n = scene.curves.filter(c=>c.type==='vline' || (c.type==='line' && Math.abs(c.m)<1e-9)).length;
+    if (n!==configSpec.nAxisLine) return false;
+  }
+  if (configSpec.hasInv!=='random'){
+    const has = scene.curves.some(c=>c.type==='inverse');
+    if (has!==configSpec.hasInv) return false;
+  }
+  return true;
+}
+function generateProblem(configSpec, desiredPoints, difficultySpec, shapePrefSpec){
   let best = null;
-  const maxAttempts = desiredPoints ? 400 : 80;
+  const maxAttempts = desiredPoints ? 900 : 400;
   for (let attempt=0; attempt<maxAttempts; attempt++){
-    const scene = buildScene(config);
-    const qs = pickQuestions(scene);
+    const shapePref = resolveShapePref(shapePrefSpec);
+    const config = resolveConfig(configSpec, shapePref);
+    const difficulty = resolveDifficulty(difficultySpec);
+    const scene = buildScene(config, shapePref);
+    const qs = pickQuestions(scene, difficulty, shapePref);
     if (!qs) continue;
+    // qLineThrough2(2点を通る直線の式を求める設問)が既存の直線curveと同じ2点を対象にしている場合、
+    // その直線は設問の答えと矛盾しないよう、必ず「2点を通る直線」形式の説明にする
+    for (const q of qs){
+      if (q.kind!=='line2pt') continue;
+      const P1 = scene.points.find(p=>p.label===q.p1Label);
+      const P2 = scene.points.find(p=>p.label===q.p2Label);
+      if (!P1 || !P2) continue;
+      const L = scene.curves.find(c=>c.type==='line' && Math.abs(c.m)>1e-9 &&
+        Math.abs(P1.y-(c.m*P1.x+c.b))<1e-6 && Math.abs(P2.y-(c.m*P2.x+c.b))<1e-6);
+      if (L){ L.pointsStyle = true; L.pointsStyleLabels = [P1.label, P2.label]; }
+    }
     const pruned = pruneScene(scene, qs);
+    if (hasWeakCurve(pruned, qs)) continue;
+    if (!pinnedCurveCountsOk(configSpec, pruned)) continue;
     const problem = { scene: pruned, setup: buildSetupText(pruned), questions: qs };
     if (!desiredPoints) return problem;
     if (pruned.points.length === desiredPoints) return problem;
@@ -989,7 +2400,7 @@ function generateProblem(config, desiredPoints){
 /* ============ 使われている点・曲線だけに刈り込む ============ */
 function pruneScene(scene, questions){
   const requiredLabels = new Set();
-  const addAll = arr => { if (arr) arr.forEach(l=>{ if (l!=='O') requiredLabels.add(l); }); };
+  const addAll = arr => { if (arr) arr.forEach(l=>requiredLabels.add(l)); };
   for (const q of questions){
     if (q.p1Label) requiredLabels.add(q.p1Label);
     if (q.p2Label) requiredLabels.add(q.p2Label);
@@ -997,122 +2408,79 @@ function pruneScene(scene, questions){
     addAll(q.quadPts);
     addAll(q.refLabels);
   }
-  const requiredCurveIdx = new Set();
-  const directCurveIdx = new Set();
+  const requiredCurveIds = new Set();
   for (const q of questions){
-    if (q.curveIdx!==undefined){ requiredCurveIdx.add(q.curveIdx); directCurveIdx.add(q.curveIdx); }
-    if (q.curveIdxs) q.curveIdxs.forEach(i=>{ requiredCurveIdx.add(i); directCurveIdx.add(i); });
-    if (q.hostIdx!==undefined){ requiredCurveIdx.add(q.hostIdx); directCurveIdx.add(q.hostIdx); }
+    if (q.curveIdx!==undefined) requiredCurveIds.add(q.curveIdx);
+    if (q.curveIdxs) q.curveIdxs.forEach(i=>requiredCurveIds.add(i));
+    if (q.hostIdx!==undefined) requiredCurveIds.add(q.hostIdx);
   }
-  for (let iter=0; iter<6; iter++){
-    let changed = false;
-    for (const p of scene.points){
-      if (requiredLabels.has(p.label) && !requiredCurveIdx.has(p.curveIdx)){
-        requiredCurveIdx.add(p.curveIdx); changed = true;
-      }
-    }
-    scene.curves.forEach((c, idx)=>{
-      if (!requiredCurveIdx.has(idx)) return;
-      if (c.connector){
-        for (const l of c.through){ if (!requiredLabels.has(l)){ requiredLabels.add(l); changed=true; } }
-      }
-      if (c.sharedIntersection && c.intersectsWith){
-        const depIdx = scene.curves.indexOf(c.intersectsWith);
-        if (depIdx>=0 && !requiredCurveIdx.has(depIdx)){ requiredCurveIdx.add(depIdx); changed=true; }
-      }
-    });
-    if (!changed) break;
-  }
-  const prunedCurves = scene.curves
-    .map((c,idx)=>({c,idx}))
-    .filter(({idx})=>requiredCurveIdx.has(idx))
-    .map(({c,idx})=>{
-      const base = c.pointLabels ? {...c, pointLabels: c.pointLabels.filter(l=>requiredLabels.has(l))} : {...c};
-      base._mentionedElsewhere = !directCurveIdx.has(idx) && (base.pointLabels? base.pointLabels.length===0 : true);
-      return base;
-    });
   const prunedPoints = scene.points.filter(p=>requiredLabels.has(p.label));
+  prunedPoints.forEach(p=>{
+    if (!p.origin) return;
+    if (p.origin.c1!==undefined) requiredCurveIds.add(p.origin.c1);
+    if (p.origin.c2!==undefined) requiredCurveIds.add(p.origin.c2);
+  });
+  const prunedCurves = scene.curves.filter(c=>requiredCurveIds.has(c.id));
   return {curves: prunedCurves, points: prunedPoints};
 }
 
-/* ============ 設問文組み立て ============ */
-function ptOf(scene, label){ return scene.points.find(p=>p.label===label); }
-function buildSetupText(scene){
-  const parts = [];
+/* 軸に平行な直線以外で「交点が1個しかない(=図の中で他と絡まない)」線が残っていないか確認する。
+   その線自体が設問の主役(変域・動点・交点を尋ねる問題)になっている場合は例外として許可する。 */
+function hasWeakCurve(scene, questions){
+  const directCurveIds = new Set();
+  for (const q of questions){
+    if (q.curveIdx!==undefined) directCurveIds.add(q.curveIdx);
+    if (q.curveIdxs) q.curveIdxs.forEach(i=>directCurveIds.add(i));
+    if (q.hostIdx!==undefined) directCurveIds.add(q.hostIdx);
+  }
+  const countByCurve = new Map();
+  for (const p of scene.points){
+    if (!p.origin) continue;
+    if (p.origin.c1!==undefined) countByCurve.set(p.origin.c1, (countByCurve.get(p.origin.c1)||0)+1);
+    if (p.origin.c2!==undefined) countByCurve.set(p.origin.c2, (countByCurve.get(p.origin.c2)||0)+1);
+  }
   for (const c of scene.curves){
-    const labels = c.pointLabels || [];
-    if (c.type==='parabola'){
-      if (labels.length===0){
-        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
-      } else if (labels.length===1){
-        const p1 = ptOf(scene,labels[0]);
-        parts.push(`${describeCurveName(c)}のグラフ上に点${labels[0]}があり、そのx座標は${formatNum(p1.x)}である。`);
+    const isAxisParallel = c.type==='vline' || (c.type==='line' && c.m===0);
+    if (isAxisParallel) continue;
+    if (directCurveIds.has(c.id)) continue;
+    const total = countByCurve.get(c.id) || 0;
+    if (total<=1) return true;
+  }
+  return false;
+}
+
+/* ============ 設問文組み立て ============ */
+/* 点は「関数どうしの交点」または「関数と座標軸の交点」としてのみ導入する。 */
+function ptOf(scene, label){ return scene.points.find(p=>p.label===label); }
+function curveById(scene, id){ return scene.curves.find(c=>c.id===id); }
+function buildSetupText(scene){
+  const pointParts = [];
+  let hasOPoint = false;
+  for (const p of scene.points){
+    if (p.label==='O'){ hasOPoint = true; continue; }
+    if (!p.origin) continue;
+    if (p.origin.kind==='cc'){
+      const {c1,c2,otherX} = p.origin;
+      const nameA = describeCurveName(curveById(scene,c1));
+      const nameB = describeCurveName(curveById(scene,c2));
+      if (otherX===null || otherX===undefined){
+        pointParts.push(`${nameA}と${nameB}の交点を${p.label}とする。`);
       } else {
-        const [l1,l2] = labels;
-        const p1=ptOf(scene,l1), p2=ptOf(scene,l2);
-        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(p1.x)}、${formatNum(p2.x)}である。`);
+        const qualifier = p.x < otherX ? 'x座標が小さい方' : 'x座標が大きい方';
+        pointParts.push(`${nameA}と${nameB}の交点のうち、${qualifier}を${p.label}とする。`);
       }
-    } else if (c.type==='vline'){
-      if (labels.length===0){
-        if (!c._mentionedElsewhere) parts.push(`直線x=${formatNum(c.x)}のグラフがある。`);
-      } else if (labels.length===1){
-        const l = labels[0];
-        if (c.sharedIntersection && c._sharedLabel===l){
-          parts.push(`直線x=${formatNum(c.x)}は${describeCurveName(c.intersectsWith)}と点${l}で交わる。`);
-        } else {
-          parts.push(`直線x=${formatNum(c.x)}上に点${l}があり、そのy座標は${formatNum(ptOf(scene,l).y)}である。`);
-        }
-      } else {
-        const [l1,l2] = labels;
-        if (c.sharedIntersection && c._sharedLabel===l1){
-          parts.push(`直線x=${formatNum(c.x)}は${describeCurveName(c.intersectsWith)}と点${l1}で交わる。この直線上にはさらに点${l2}があり、そのy座標は${formatNum(ptOf(scene,l2).y)}である。`);
-        } else {
-          parts.push(`直線x=${formatNum(c.x)}上に2点${l1}、${l2}があり、そのy座標はそれぞれ${formatNum(ptOf(scene,l1).y)}、${formatNum(ptOf(scene,l2).y)}である。`);
-        }
-      }
-    } else if (c.type==='line'){
-      if (c.connector){
-        parts.push(`2点${c.through[0]}、${c.through[1]}を通る直線を考える。`);
-      } else if (labels.length===0){
-        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
-      } else if (c.sharedIntersection){
-        const sharedLabel = c._sharedLabel;
-        const hasShared = labels.includes(sharedLabel);
-        const others = labels.filter(l=>l!==sharedLabel);
-        if (hasShared){
-          let s = `直線${fmtLinear(c.m,c.b)}は${describeCurveName(c.intersectsWith)}と点${sharedLabel}で交わる。`;
-          if (others.length) s += `この直線上にはさらに点${others[0]}があり、そのx座標は${formatNum(ptOf(scene,others[0]).x)}である。`;
-          parts.push(s);
-        } else if (others.length){
-          parts.push(`${describeCurveName(c)}のグラフ上に点${others[0]}があり、そのx座標は${formatNum(ptOf(scene,others[0]).x)}である。`);
-        }
-      } else if (c.isProportion){
-        if (labels.length===1){
-          parts.push(`比例y=${formatNum(c.m)}xのグラフ上に点${labels[0]}があり、そのx座標は${formatNum(ptOf(scene,labels[0]).x)}である。`);
-        } else {
-          const [l1,l2] = labels;
-          parts.push(`比例y=${formatNum(c.m)}xのグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
-        }
-      } else if (labels.length===2){
-        const [l1,l2] = labels;
-        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
-      } else {
-        const l = labels[0];
-        parts.push(`${describeCurveName(c)}のグラフ上に点${l}があり、そのx座標は${formatNum(ptOf(scene,l).x)}である。`);
-      }
-    } else if (c.type==='inverse'){
-      if (labels.length===0){
-        if (!c._mentionedElsewhere) parts.push(`${describeCurveName(c)}のグラフがある。`);
-      } else if (labels.length===2){
-        const [l1,l2] = labels;
-        parts.push(`${describeCurveName(c)}のグラフ上に2点${l1}、${l2}があり、そのx座標はそれぞれ${formatNum(ptOf(scene,l1).x)}、${formatNum(ptOf(scene,l2).x)}である。`);
-      } else {
-        const l = labels[0];
-        parts.push(`${describeCurveName(c)}のグラフ上に点${l}があり、そのx座標は${formatNum(ptOf(scene,l).x)}である。`);
-      }
+    } else if (p.origin.kind==='axis'){
+      const c = curveById(scene, p.origin.c1);
+      const axisName = p.origin.axis==='x' ? 'x軸' : 'y軸';
+      pointParts.push(`${describeCurveName(c)}と${axisName}の交点を${p.label}とする。`);
     }
   }
-  return '点Oを原点とする座標平面上に、次のグラフがある。' + parts.join('');
+  let text = '点Oを原点とする座標平面上に考える。';
+  if (hasOPoint) text += '原点をOとする。';
+  // 実際の入試でよく使われる、座標軸の目盛りの単位を明記する定型文(図に目盛りがなくても
+  // 1目盛りの長さが分かるようにするための一文)。
+  const scaleNote = 'ただし、原点Oから点(1, 0)までの距離及び原点Oから点(0, 1)までの距離をそれぞれ1cmとする。';
+  return text + pointParts.join('') + scaleNote;
 }
 
 /* ============ 図(SVG)への変換 ============ */
@@ -1121,20 +2489,34 @@ function curvesToRenderFormat(scene, extraXs){
   const minX = Math.min(0,...allX), maxX = Math.max(0,...allX);
   return scene.curves.map(c=>{
     if (c.type==='inverse'){
-      if (c.k>0) return {type:'inverse', k:c.k, xrange:[Math.max(0.6,minX-1), Math.max(maxX+3,3)]};
-      return {type:'inverse', k:c.k, xrange:[Math.min(minX-3,-3), Math.min(-0.6,maxX+1)]};
+      if (c.k>0) return {type:'inverse', k:c.k, xrange:[Math.max(0.6,minX-1), Math.max(maxX+3,3)], unknownParam:c.unknownParam};
+      return {type:'inverse', k:c.k, xrange:[Math.min(minX-3,-3), Math.min(-0.6,maxX+1)], unknownParam:c.unknownParam};
     }
     if (c.type==='vline') return {type:'vline', x:c.x};
-    return {type:c.type, a:c.a, m:c.m, b:c.b, xrange:[minX-2, maxX+2]};
+    return {type:c.type, a:c.a, m:c.m, b:c.b, xrange:[minX-2, maxX+2], unknownParam:c.unknownParam};
   });
 }
+/* segLabels: [a,b] または [a,b,'dashed'] の配列。
+   図形(三角形・四角形)の本物の辺は常に実線で結ばれる必要があるため、線種は
+   「何番目の辺か」では判定せず、呼び出し側が明示的に'dashed'を指定した要素だけを
+   点線にする(指定がなければ実線)。中線・二等分線など、図形の辺ではない補助線を
+   示したいときだけ3番目の要素に'dashed'を渡す。 */
 function sceneToFigure(scene, extraPoints=[], segLabels=[], hintPoints=[]){
   const needsO = segLabels.some(([a,b])=>a==='O'||b==='O') || extraPoints.some(p=>p.label==='O');
   const basePoints = scene.points.map(p=>({x:p.x,y:p.y,label:p.label,pos: p.y>=0?'above':'below'}));
   const pts = [...basePoints, ...extraPoints.map(p=>({x:p.x,y:p.y,label:p.label,pos: p.label==='M'?'below':'above'}))];
   if (needsO && !pts.some(p=>p.label==='O')) pts.push({x:0,y:0,label:'O',pos:'below'});
-  const idx = label => pts.findIndex(p=>p.label===label);
-  const segments = segLabels.map(([a,b],i)=>[idx(a), idx(b), i===segLabels.length-1 && segLabels.length>2 ? 'dashed':'solid']).filter(s=>s[0]>=0&&s[1]>=0);
+  // 設問固有の補助点(extraPoints、例: 平行四辺形のC・D)のラベルが、たまたま元の場面の
+  // 交点(basePoints)と同じ文字(例: 'C')になることがある。単純にpts全体を先頭から
+  // findIndexすると、その場合basePoints側の無関係な点が先にヒットしてしまい、
+  // 多角形の頂点が誤った点に置き換わって図形が閉じなくなる(壊れる)。
+  // そのため、ラベル検索はextraPoints側を優先する。
+  const idx = label => {
+    const ei = extraPoints.findIndex(p=>p.label===label);
+    if (ei>=0) return basePoints.length + ei;
+    return basePoints.findIndex(p=>p.label===label);
+  };
+  const segments = segLabels.map(([a,b,style])=>[idx(a), idx(b), style==='dashed' ? 'dashed':'solid']).filter(s=>s[0]>=0&&s[1]>=0);
   const extraXs = extraPoints.map(p=>p.x);
   const ptsWithHints = [...pts, ...hintPoints.map(p=>({x:p.x,y:p.y,label:null}))];
   return { curves: curvesToRenderFormat(scene, extraXs), points: ptsWithHints, segments };
@@ -1142,15 +2524,16 @@ function sceneToFigure(scene, extraPoints=[], segLabels=[], hintPoints=[]){
 function figureForQuestion(scene, q){
   if (q.kind==='line2pt') return sceneToFigure(scene, [], [[q.p1Label,q.p2Label]]);
   if (q.kind==='area') return sceneToFigure(scene, [], [[q.trianglePts[0],q.trianglePts[1]],[q.trianglePts[1],q.trianglePts[2]],[q.trianglePts[2],q.trianglePts[0]]]);
-  if (q.kind==='quad'){
+  if (q.kind==='quad' || q.kind==='symTrap' || q.kind==='rhombus' || q.kind==='twoParaRect'){
     const segs=[]; for (let i=0;i<4;i++) segs.push([q.quadPts[i], q.quadPts[(i+1)%4]]);
-    return sceneToFigure(scene, [], segs);
+    return sceneToFigure(scene, q.extraPoints||[], segs);
   }
   if (q.kind==='bisect'){
     const [v,p1,p2] = q.trianglePts;
-    return sceneToFigure(scene, q.extraPoints, [[v,p1],[p1,p2],[p2,v],[v,'M']]);
+    return sceneToFigure(scene, q.extraPoints, [[v,p1],[p1,p2],[p2,v],[v,'M','dashed']]);
   }
   if (q.kind==='intersect') return sceneToFigure(scene, q.extraPoints, []);
+  if (q.kind==='areaChain') return sceneToFigure(scene, q.extraPoints, [[q.trianglePts[0],q.trianglePts[1]],[q.trianglePts[1],q.trianglePts[2]],[q.trianglePts[2],q.trianglePts[0]]]);
   if (q.kind==='movArea'){
     const [l1,l2] = q.refLabels;
     return sceneToFigure(scene, q.extraPoints, [['P',l1],[l1,l2],[l2,'P']]);
@@ -1159,20 +2542,88 @@ function figureForQuestion(scene, q){
     const [l1] = q.refLabels;
     return sceneToFigure(scene, q.extraPoints, [['P',l1]]);
   }
+  if (q.kind==='bisectArea'){
+    const [v,a,b] = q.trianglePts;
+    return sceneToFigure(scene, q.extraPoints, [[v,a],[a,b],[b,v],['D','E','dashed']]);
+  }
+  if (q.kind==='lenTarget') return sceneToFigure(scene, q.extraPoints, [['P','Q']]);
+  if (q.kind==='parallelogram' || q.kind==='paraFindD'){
+    const [aLabel,bLabel] = q.refLabels;
+    const [cLabel,dLabel] = q.extraPoints.map(p=>p.label);
+    return sceneToFigure(scene, q.extraPoints, [[aLabel,bLabel],[bLabel,cLabel],[cLabel,dLabel],[dLabel,aLabel]]);
+  }
+  if (q.kind==='squareFindX') return sceneToFigure(scene, q.extraPoints, []);
+  if (q.kind==='squareTwoLines'){
+    const [nA,nB,nC,nD] = q.squareLabels;
+    return sceneToFigure(scene, q.extraPoints, [[nA,nB],[nB,nC],[nC,nD],[nD,nA]]);
+  }
+  if (q.kind==='asymPara'){
+    const [pL,rL,sL,qL] = q.quadPts;
+    return sceneToFigure(scene, q.extraPoints, [[pL,rL],[rL,sL],[sL,qL],[qL,pL]]);
+  }
   return sceneToFigure(scene, [], []);
 }
 
 /* ============ UI ============ */
+/* フィールドごとに「固定値」か「ランダム」かを指定できるようにする。
+   getConfig()は各項目を固定値または文字列'random'として持つ「設定スペック」を返し、
+   実際の値への解決(ランダム抽選)はgenerateProblemの試行ループの中で毎回行う
+   (resolveConfig/resolveDifficulty/resolveShapePref)。これにより、
+   「放物線の数は2に固定、直線の数はランダム」のような混在指定が、
+   リトライのたびに固定項目は変わらずランダム項目だけ再抽選される形で成立する。 */
 function getConfig(){
-  const nPara = parseInt(document.getElementById('numPara').value) || 0;
-  const nLine = parseInt(document.getElementById('numLine').value) || 0;
-  const nAxisLine = parseInt(document.getElementById('numAxisLine').value) || 0;
-  const hasInv = document.getElementById('hasInverse').checked;
-  return {nPara, nLine, nAxisLine, hasInv};
+  const readNum = (id) => {
+    const v = document.getElementById(id).value;
+    return v==='random' ? 'random' : (parseInt(v) || 0);
+  };
+  const invEl = document.getElementById('hasInverse').value;
+  const hasInv = invEl==='random' ? 'random' : (invEl==='yes');
+  return {
+    nPara: readNum('numPara'),
+    nLine: readNum('numLine'),
+    nAxisLine: readNum('numAxisLine'),
+    hasInv
+  };
+}
+/* 旧来の「完全ランダム」時に使っていた各項目の乱数の範囲・分布をそのまま再利用する。
+   固定値が指定されている項目はここでは触らず、'random'指定の項目だけ抽選する。 */
+function resolveConfig(spec, shapePref){
+  // shapePref==='quad'のとき、ユーザーが明示的に固定していない(='random'の)項目については、
+  // 放物線+水平線2本+傾きのある直線2本以上が揃いやすい構成に偏らせ、qParabolaSymQuad/
+  // qParabolaRhombus/平行四辺形(buildParallelogramPair)が成立しやすいシーンを増やす。
+  // 明示的に固定された項目(数値そのもの)はそのまま尊重し、上書きしない。
+  const quadBias = shapePref==='quad' || shapePref==='parallelogram' || shapePref==='rhombus';
+  return {
+    nPara: spec.nPara==='random' ? (quadBias ? choice([1,1,2,2]) : choice([0,1,1,2])) : spec.nPara,
+    nLine: spec.nLine==='random' ? (quadBias ? choice([1,2,2,3,3]) : choice([0,1,2,2,3])) : spec.nLine,
+    nAxisLine: spec.nAxisLine==='random' ? (quadBias ? choice([1,1,2,2,2]) : choice([0,0,0,1,2])) : spec.nAxisLine,
+    hasInv: spec.hasInv==='random' ? (Math.random()<0.3) : spec.hasInv
+  };
+}
+function configSpecAllFixedAndEmpty(spec){
+  if (spec.nPara==='random' || spec.nLine==='random' || spec.nAxisLine==='random' || spec.hasInv==='random') return false;
+  return spec.nPara===0 && spec.nLine===0 && spec.nAxisLine===0 && !spec.hasInv;
 }
 function getDesiredPoints(){
   const v = parseInt(document.getElementById('numPoints').value) || 0;
   return v>0 ? v : null;
+}
+function getDifficulty(){
+  const el = document.getElementById('difficulty');
+  return el ? el.value : 'easy';
+}
+function resolveDifficulty(spec){
+  return spec==='random' ? choice(['easy','medium','hard']) : (spec || 'easy');
+}
+function getShapePref(){
+  const el = document.getElementById('shapePref');
+  return el ? el.value : 'either';
+}
+/* shapePref='either'(指定なし)は「絞り込みをしない」という意味で、1つの問題の中で
+   三角形・四角形の設問が混在してもよい。一方'random'は毎回の生成で三角形か四角形の
+   どちらか1つに強制的に決める、明確に異なる挙動なのでeitherとは別の選択肢として扱う。 */
+function resolveShapePref(spec){
+  return spec==='random' ? choice(['triangle','quad']) : (spec || 'either');
 }
 
 /* ============ 印刷レイアウト ============ */
@@ -1183,39 +2634,38 @@ function renderPrintSubQuestion(q, idx, isLast){
   inner += `</div>`;
   return inner;
 }
+/* 以前は上部の全体図(fig1)と、最後の設問専用の図(fig2、多角形の辺やC・Dなどの
+   補助点を正しく描画)の2つを並べて表示していたが、実際の入試では1つの図に
+   最初からすべての点・図形が描かれているのが普通で、グラフが2つあると
+   かえって見づらい・冗長という指摘を受けたため、1つの図に統合する。
+   figureForQuestion(問題全体のscene, 最後の設問)を使えば、場面のすべての点に加えて
+   最後の設問特有の補助点・多角形の辺(実線)も1つの図の中に含められる。 */
 function renderPrintProblem(problem){
   const box = document.createElement('div');
   box.className = 'print-problem';
   const fig1Id = `pf1-${Math.random().toString(36).slice(2,8)}`;
-  const fig2Id = `pf2-${Math.random().toString(36).slice(2,8)}`;
   const lastQ = problem.questions[problem.questions.length-1];
-  const hasExtra = (lastQ.extraPoints && lastQ.extraPoints.length>0) || lastQ.kind==='line2pt' || lastQ.kind==='area' || lastQ.kind==='quad';
   box.innerHTML = `
     <div class="setup-line">
       <p>${problem.setup}</p>
       <div class="figbox"><div id="${fig1Id}"></div></div>
     </div>
     ${problem.questions.map((q,i)=>renderPrintSubQuestion(q,i, i===problem.questions.length-1)).join('')}
-    ${hasExtra ? `<div class="figbox" style="margin-top:10px;"><div id="${fig2Id}"></div><div style="font-size:11px;color:var(--sub-ink);">最後の設問の図</div></div>` : ''}
   `;
   requestAnimationFrame(()=>{
     const h1 = document.getElementById(fig1Id);
-    if (h1) renderScene(h1, sceneToFigure(problem.scene, [], [], lastQ.extraPoints||[]), 280);
-    if (hasExtra){
-      const h2 = document.getElementById(fig2Id);
-      if (h2) renderScene(h2, figureForQuestion(problem.scene, lastQ), 280);
-    }
+    if (h1) renderScene(h1, figureForQuestion(problem.scene, lastQ), 280);
   });
   return box;
 }
 function buildPrintSheet(){
-  const config = getConfig();
-  if (config.nPara===0 && config.nLine===0 && config.nAxisLine===0 && !config.hasInv){
+  const configSpec = getConfig();
+  if (configSpecAllFixedAndEmpty(configSpec)){
     alert('放物線・直線・反比例のうち、少なくとも1つは選んでください。');
     return;
   }
   const desiredPoints = getDesiredPoints();
-  const problem = generateProblem(config, desiredPoints);
+  const problem = generateProblem(configSpec, desiredPoints, getDifficulty(), getShapePref());
   if (!problem){ alert('この組み合わせでは生成できませんでした。数を減らすか、別の組み合わせでお試しください。'); return; }
   if (desiredPoints && problem.scene.points.length !== desiredPoints){
     alert(`この組み合わせでは点${desiredPoints}個の問題は作れなかったため、最も近い${problem.scene.points.length}個で作成しました。`);
@@ -1247,6 +2697,9 @@ function buildPrintSheet(){
   return { build: buildPrintSheet };
 })();
 
+/* ============================================================
+   図形エンジン(IIFEでスコープを分離)
+   ============================================================ */
 const GeomEngine = (function(){
 
 /* ============ ユーティリティ ============ */
@@ -1270,32 +2723,6 @@ function formatNum(x, maxDenom=40){
 }
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function weightedPickOne(items){
-  const total = items.reduce((s,it)=>s+it.w,0);
-  let r = Math.random()*total;
-  for (const it of items){ r -= it.w; if (r<=0) return it; }
-  return items[items.length-1];
-}
-function pickFromMenu(menu, count, proofPriority){
-  const pool = menu.slice();
-  const chosen = [];
-  if (proofPriority){
-    const proofItems = pool.filter(it=>it.q.type==='proof');
-    if (proofItems.length){
-      const picked = weightedPickOne(proofItems);
-      chosen.push(picked.q);
-      pool.splice(pool.indexOf(picked),1);
-    }
-  }
-  while (chosen.length<count && pool.length){
-    const picked = weightedPickOne(pool);
-    chosen.push(picked.q);
-    pool.splice(pool.indexOf(picked),1);
-  }
-  // 出題順をシャッフル
-  for (let i=chosen.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [chosen[i],chosen[j]]=[chosen[j],chosen[i]]; }
-  return chosen;
-}
 function shoelace(pts){
   let s=0;
   for (let i=0;i<pts.length;i++){ const [x1,y1]=pts[i]; const [x2,y2]=pts[(i+1)%pts.length]; s+=x1*y2-x2*y1; }
@@ -1370,54 +2797,49 @@ const TRIPLES = [[3,4,5],[6,8,10],[5,12,13],[8,15,17],[7,24,25],[9,12,15],[12,16
 function generatePattern1(){
   const [a,b,c] = choice(TRIPLES);
   const AD = b*b/c, BD = a*a/c, CD = a*b/c;
-  const areaABC = a*b/2, areaACD = AD*CD/2, areaBCD = BD*CD/2;
 
+  // 描画用座標: A=(0,0), B=(c,0), D=(AD,0), C=(AD,CD)
   const A=[0,0], B=[c,0], D=[AD,0], C=[AD,CD];
+
   const setup = `<span class="mathexpr">∠ACB=90°</span>の直角三角形ABCがある。頂点Cから辺ABに垂線をひき、ABとの交点をDとする。`;
+
   const scene = {
     points: [
-      {x:A[0],y:A[1],label:'A',pos:'below'}, {x:B[0],y:B[1],label:'B',pos:'below'},
-      {x:C[0],y:C[1],label:'C',pos:'above'}, {x:D[0],y:D[1],label:'D',pos:'below'},
+      {x:A[0],y:A[1],label:'A',pos:'below'},
+      {x:B[0],y:B[1],label:'B',pos:'below'},
+      {x:C[0],y:C[1],label:'C',pos:'above'},
+      {x:D[0],y:D[1],label:'D',pos:'below'},
     ],
     segments: [[0,1,'solid'],[1,2,'solid'],[2,0,'solid'],[2,3,'dashed']],
     rightAngleMarks: [[2,0,1],[3,0,2]]
   };
 
-  const menu = [];
-  menu.push({ w:3, q:{ style:'proof', type:'proof',
-    prompt: `△ABC∽△ACDであることを証明しなさい。`, final: `(証明は解説を参照)`,
-    steps: `[証明]\n△ABCと△ACDにおいて、\n仮定より ∠ACB=∠ADC=90°…①\n共通な角だから ∠BAC=∠CAD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ACD` }});
-  menu.push({ w:3, q:{ style:'proof', type:'proof',
-    prompt: `△ABC∽△CBDであることを証明しなさい。`, final: `(証明は解説を参照)`,
-    steps: `[証明]\n△ABCと△CBDにおいて、\n仮定より ∠ACB=∠CDB=90°…①\n共通な角だから ∠ABC=∠CBD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△CBD` }});
-  menu.push({ w:2, q:{ style:'plain', type:'text',
-    prompt: `線分ADの長さを求めなさい。`, final: formatNum(AD),
-    steps: `△ABC∽△ACDより、AD:AC=AC:AB。よってAD=<span class="mathexpr">AC²÷AB</span>=${formatNum(b)}²÷${formatNum(c)}=${formatNum(AD)}。` }});
-  menu.push({ w:2, q:{ style:'plain', type:'text',
-    prompt: `線分BDの長さを求めなさい。`, final: formatNum(BD),
-    steps: `△ABC∽△CBDより、BD:BC=BC:AB。よってBD=<span class="mathexpr">BC²÷AB</span>=${formatNum(a)}²÷${formatNum(c)}=${formatNum(BD)}。` }});
-  menu.push({ w:2, q:{ style:'plain', type:'text',
-    prompt: `線分CDの長さを求めなさい。`, final: formatNum(CD),
-    steps: `△ABC∽△CBDより、CD:BC=AC:AB。よってCD=<span class="mathexpr">BC×AC÷AB</span>=${formatNum(a)}×${formatNum(b)}÷${formatNum(c)}=${formatNum(CD)}。` }});
-  menu.push({ w:1, q:{ style:'plain', type:'text',
-    prompt: `△ACDの面積を求めなさい。`, final: formatNum(areaACD),
-    steps: `△ACDは∠ADC=90°の直角三角形で、AD=${formatNum(AD)}、CD=${formatNum(CD)}だから\n面積=<span class="mathexpr">AD×CD÷2</span>=${formatNum(areaACD)}。` }});
-  menu.push({ w:1, q:{ style:'plain', type:'text',
-    prompt: `△BCDの面積を求めなさい。`, final: formatNum(areaBCD),
-    steps: `△BCDは∠BDC=90°の直角三角形で、BD=${formatNum(BD)}、CD=${formatNum(CD)}だから\n面積=<span class="mathexpr">BD×CD÷2</span>=${formatNum(areaBCD)}。` }});
-  menu.push({ w:2, q:{ style:'plain', type:'text',
-    prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ACDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-    final: `<span class="mathexpr"><i>x</i>°</span>`,
-    steps: `△ABC∽△ACDであり、∠ABCと∠ACDは対応する角だから、∠ACD=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` }});
-  menu.push({ w:2, q:{ style:'plain', type:'text',
-    prompt: `<span class="mathexpr">∠BAC=<i>x</i>°</span>とするとき、∠BCDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-    final: `<span class="mathexpr"><i>x</i>°</span>`,
-    steps: `△ABC∽△CBDであり、∠BACと∠BCDは対応する角だから、∠BCD=∠BAC=<span class="mathexpr"><i>x</i>°</span>。` }});
+  const askAD = Math.random()<0.5;
+  const lenQAnswer = askAD ? AD : BD;
+  const lenQLabel = askAD ? 'AD' : 'BD';
 
-  const questions = pickFromMenu(menu, 4, /*proofPriority=*/true);
-  return { unitLabel: '直角三角形+相似', scene,
+  return {
+    unitLabel: '直角三角形+相似', scene,
     setup: `${setup}<span class="mathexpr">BC=${formatNum(a)}, CA=${formatNum(b)}, AB=${formatNum(c)}</span>とする。`,
-    questions };
+    questions: [
+      { style:'plain', type:'text',
+        prompt: `線分${lenQLabel}の長さを求めなさい。`,
+        final: formatNum(lenQAnswer),
+        steps: `△ABCと△${askAD?'ACD':'CBD'}において、共通(または対頂)な角と直角より∠A(∠B)が共通、∠ADC=∠ACB=90°だから2組の角がそれぞれ等しく相似。\n相似比から ${askAD? 'AD:AC=AC:AB':'BD:BC=BC:AB'} より、${lenQLabel}=<span class="mathexpr">${formatNum(b)}²÷${formatNum(c)}</span>=${formatNum(lenQAnswer)}(実際は${askAD?'AC²÷AB':'BC²÷AB'})。` },
+      { style:'proof', type:'proof',
+        prompt: `△ABC∽△ACDであることを証明しなさい。`,
+        final: `(証明は解説を参照)`,
+        steps: `[証明]\n△ABCと△ACDにおいて、\n仮定より ∠ACB=∠ADC=90°…①\n共通な角だから ∠BAC=∠CAD…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ACD` },
+      { style:'plain', type:'text',
+        prompt: `線分CDの長さを求めなさい。`,
+        final: formatNum(CD),
+        steps: `△ABC∽△CBDより、CD:BC=AC:AB。よってCD=<span class="mathexpr">BC×AC÷AB</span>=${formatNum(a)}×${formatNum(b)}÷${formatNum(c)}=${formatNum(CD)}。` },
+      { style:'plain', type:'text',
+        prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ACDの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+        final: `<span class="mathexpr"><i>x</i>°</span>`,
+        steps: `△ABC∽△ACDであり、∠ABCと∠ACDは対応する角だから、∠ACD=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` },
+    ]
+  };
 }
 
 /* ============ パターン2: 中点連結の一般化(対角の頂点から同じ比) ============ */
@@ -1474,38 +2896,33 @@ function generatePattern2(){
       rightAngleMarks: []
     };
 
-    const menu = [];
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分PSの長さを求めなさい。`, final: formatNum(PS),
-      steps: `△ABDにおいて、AP:AB=AS:AD=${k}:${n}だから、PS∥BDであり、PS:BD=${k}:${n}。\nよってPS=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分QRの長さを求めなさい。`, final: formatNum(PS),
-      steps: `△CBDにおいて、CQ:CB=CR:CD=${k}:${n}だから、QR∥BDであり、QR:BD=${k}:${n}。\nよってQR=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` }});
-    menu.push({ w:3, q:{ style:'proof', type:'proof',
-      prompt: `四角形PQRSが平行四辺形であることを証明しなさい。`, final: `(証明は解説を参照)`,
-      steps: `[証明]\n△ABDにおいて、AP:PB=AS:SD=${k}:${n-k}だから、PS∥BD、PS=BD×${k}/${n}…①\n△CBDにおいて、CQ:QB=CR:RD=${k}:${n-k}だから、QR∥BD、QR=BD×${k}/${n}…②\n①、②より、PS∥QR、PS=QR\nよって1組の対辺が平行でその長さが等しいので、四角形PQRSは平行四辺形である。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `四角形ABCDの面積が${formatNum(area)}のとき、四角形PQRSの面積を求めなさい。`, final: formatNum(pqrsArea),
-      steps: `PS:BD=${k}:${n}なので、四角形PQRSと四角形ABCDの面積比は<span class="mathexpr">2×(${k}/${n})×(${n-k}/${n})</span>=${formatNum(ratio)}倍になる。\nよって面積は${formatNum(area)}×${formatNum(ratio)}=${formatNum(pqrsArea)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠PQRの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-      steps: `四角形PQRSは平行四辺形であり、平行四辺形のとなり合う角の和は180°だから、∠PQR=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠QRSの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr"><i>x</i>°</span>`,
-      steps: `四角形PQRSは平行四辺形であり、平行四辺形の対角は等しいから、∠QRS=∠SPQ=<span class="mathexpr"><i>x</i>°</span>。` }});
-
     return {
       unitLabel: '中点連結の一般化', scene,
       setup: `四角形ABCDがあり、面積は${formatNum(area)}である。辺AB、AD上にそれぞれAP:PB=AS:SD=<span class="mathexpr">${k}:${n-k}</span>となる点P、Sを、辺CB、CD上にそれぞれCQ:QB=CR:RD=<span class="mathexpr">${k}:${n-k}</span>となる点Q、Rをとる。`,
-      questions: pickFromMenu(menu, 4, true)
+      questions: [
+        { style:'plain', type:'text',
+          prompt: `対角線BDの長さが${formatNum(BD)}のとき、線分PSの長さを求めなさい。`,
+          final: formatNum(PS),
+          steps: `△ABDにおいて、AP:AB=AS:AD=${k}:${n}だから、PS∥BDであり、PS:BD=${k}:${n}。\nよってPS=<span class="mathexpr">BD×${k}/${n}</span>=${formatNum(BD)}×${formatNum(t)}=${formatNum(PS)}。` },
+        { style:'proof', type:'proof',
+          prompt: `四角形PQRSが平行四辺形であることを証明しなさい。`,
+          final: `(証明は解説を参照)`,
+          steps: `[証明]\n△ABDにおいて、AP:PB=AS:SD=${k}:${n-k}だから、PS∥BD、PS=BD×${k}/${n}…①\n△CBDにおいて、CQ:QB=CR:RD=${k}:${n-k}だから、QR∥BD、QR=BD×${k}/${n}…②\n①、②より、PS∥QR、PS=QR\nよって1組の対辺が平行でその長さが等しいので、四角形PQRSは平行四辺形である。` },
+        { style:'plain', type:'text',
+          prompt: `四角形PQRSの面積を求めなさい。`,
+          final: formatNum(pqrsArea),
+          steps: `PS:BD=${k}:${n}なので、四角形PQRSと四角形ABCDの面積比は<span class="mathexpr">2×(${k}/${n})×(${n-k}/${n})</span>=${formatNum(ratio)}倍になる。\nよって面積は${formatNum(area)}×${formatNum(ratio)}=${formatNum(pqrsArea)}。` },
+        { style:'plain', type:'text',
+          prompt: `<span class="mathexpr">∠SPQ=<i>x</i>°</span>とするとき、∠PQRの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+          steps: `四角形PQRSは平行四辺形であり、平行四辺形のとなり合う角の和は180°だから、∠PQR=<span class="mathexpr">180°-<i>x</i>°</span>。` },
+      ]
     };
   }
   return null;
 }
 
-/* ============ パターン3: 台形+対角線交差の相似 ============ */
+/* ============ パターン3: 長方形+対角線交差の相似 ============ */
 function lineIntersect(P1,P2,P3,P4){
   const [x1,y1]=P1,[x2,y2]=P2,[x3,y3]=P3,[x4,y4]=P4;
   const denom = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
@@ -1540,54 +2957,27 @@ function generatePattern3(){
       rightAngleMarks: []
     };
 
-    const areaFDE = shoelace([F,D,E]);
-    // 発展構成: Eを通り線分BDに平行な直線をひき、辺ABとの交点をG(条件を満たすときだけ出題)
-    const bdDir = [D[0]-B[0], D[1]-B[1]];
-    const G = lineIntersect(E,[E[0]+bdDir[0],E[1]+bdDir[1]], A,B);
-    const stage2OK = G && G[0]>=Math.min(A[0],B[0])-1e-9 && G[0]<=Math.max(A[0],B[0])+1e-9;
-    let EG, areaGBFE;
-    if (stage2OK){
-      EG = dist(G,E);
-      areaGBFE = shoelace([G,B,F,E]);
-    }
-    const stage2Nice = stage2OK && isNice(EG,60) && isNice(areaGBFE,60) && areaGBFE>0.3;
-
-    const menu = [];
-    menu.push({ w:3, q:{ style:'proof', type:'proof',
-      prompt: `△FBC∽△FDEであることを証明しなさい。`, final: `(証明は解説を参照)`,
-      steps: `[証明]\n△FBCと△FDEにおいて、\n対頂角は等しいから ∠BFC=∠DFE…①\nAD∥BCであり、EはAD上の点だからBC∥DEとなり、平行線の錯角は等しいから\n∠FBC=∠FDE…②\n①、②より、2組の角がそれぞれ等しいので\n△FBC∽△FDE` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `線分BFと線分FDの長さの比を、最も簡単な整数の比で表しなさい。`, final: `BF:FD = <span class="mathexpr">${ratioNum}:${ratioDen}</span>`,
-      steps: `△FBC∽△FDEより、BF:FD=BC:DE。BC=AD=<span class="mathexpr">AE+ED</span>=${formatNum(topLen)}、DE=${formatNum(q)}だから\nBF:FD=${formatNum(topLen)}:${formatNum(q)}=${ratioNum}:${ratioDen}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、△FBCの面積を求めなさい。`, final: formatNum(areaFBC),
-      steps: `△DBCの面積は、台形ABCDから△ABDを除いた部分であり、底辺BCが共通で高さが台形の高さと等しいことから、台形の面積×BC/(AD+BC)で求められる。\nBF:FD=${ratioNum}:${ratioDen}より、△FBCの面積は△DBCの面積の${ratioNum}/${ratioNum+ratioDen}倍。\n計算すると△FBCの面積は${formatNum(areaFBC)}。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、△FDEの面積を求めなさい。`, final: formatNum(areaFDE),
-      steps: `△FDEと△FBCの相似比はDE:BC=${ratioDen}:${ratioNum}なので、面積比は<span class="mathexpr">${ratioDen}²:${ratioNum}²</span>。\n△FBCの面積は${formatNum(areaFBC)}だから、△FDEの面積はその<span class="mathexpr">(${ratioDen}/${ratioNum})²</span>倍の${formatNum(areaFDE)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠DBC=<i>x</i>°</span>とするとき、∠BDEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr"><i>x</i>°</span>`,
-      steps: `AD∥BCであり、EはAD上の点だからBC∥DEとなる。線分BDが2直線BC,DEに交わる錯角だから、∠BDE=∠DBC=<span class="mathexpr"><i>x</i>°</span>。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `△FBCと△FDEの面積比を、最も簡単な整数の比で表しなさい。`,
-      final: `△FBC:△FDE = <span class="mathexpr">${ratioNum*ratioNum}:${ratioDen*ratioDen}</span>`,
-      steps: `△FBC∽△FDEで相似比がBC:DE=${ratioNum}:${ratioDen}だから、面積比はその2乗で<span class="mathexpr">${ratioNum}²:${ratioDen}²</span>=${ratioNum*ratioNum}:${ratioDen*ratioDen}。` }});
-    if (stage2Nice){
-      scene.points.push({x:G[0],y:G[1],label:'G',pos:'left'});
-      scene.segments.push([6,4,'solid']);
-      menu.push({ w:2, q:{ style:'plain', type:'text',
-        prompt: `点Eを通り線分BDに平行な直線をひき、辺ABとの交点をGとする。線分EGの長さを求めなさい。`, final: formatNum(EG),
-        steps: `EG∥DBであり、△AEGと△ADBにおいて、共通な角と平行線の同位角からEG:DB=AE:ADとなる。\nBD=${formatNum(dist(B,D))}、AE:AD=${formatNum(p0)}:${formatNum(topLen)}だから\nEG=<span class="mathexpr">BD×AE/AD</span>=${formatNum(dist(B,D))}×${formatNum(p0)}/${formatNum(topLen)}=${formatNum(EG)}。` }});
-      menu.push({ w:1, q:{ style:'plain', type:'text',
-        prompt: `台形ABCDの面積が${formatNum(areaTrap)}であるとき、四角形GBFEの面積を求めなさい。`, final: formatNum(areaGBFE),
-        steps: `四角形GBFEの面積は、台形ABCDの面積から周囲の余分な三角形の面積を引くことで求められる。\n計算すると、四角形GBFEの面積は${formatNum(areaGBFE)}。` }});
-    }
-
     return {
       unitLabel:'台形+対角線交差', scene,
       setup: `四角形ABCDは<span class="mathexpr">AD∥BC</span>の台形であり、点Eは辺AD上にある。線分BDと線分CEの交点をFとする。<span class="mathexpr">AE=${formatNum(p0)}, ED=${formatNum(q)}</span>とする。`,
-      questions: pickFromMenu(menu, 4, true)
+      questions: [
+        { style:'proof', type:'proof',
+          prompt: `△FBC∽△FDEであることを証明しなさい。`,
+          final: `(証明は解説を参照)`,
+          steps: `[証明]\n△FBCと△FDEにおいて、\n対頂角は等しいから ∠BFC=∠DFE…①\nAD∥BCであり、EはAD上の点だからBC∥DEとなり、平行線の錯角は等しいから\n∠FBC=∠FDE…②\n①、②より、2組の角がそれぞれ等しいので\n△FBC∽△FDE` },
+        { style:'plain', type:'text',
+          prompt: `線分BFと線分FDの長さの比を、最も簡単な整数の比で表しなさい。`,
+          final: `BF:FD = <span class="mathexpr">${ratioNum}:${ratioDen}</span>`,
+          steps: `△FBC∽△FDEより、BF:FD=BC:DE。BC=AD=<span class="mathexpr">AE+ED</span>=${formatNum(topLen)}、DE=${formatNum(q)}だから\nBF:FD=${formatNum(topLen)}:${formatNum(q)}=${ratioNum}:${ratioDen}。` },
+        { style:'plain', type:'text',
+          prompt: `台形ABCDの面積が<span class="mathnum">${formatNum(areaTrap)}</span>であるとき、△FBCの面積を求めなさい。`,
+          final: formatNum(areaFBC),
+          steps: `△DBCの面積は、台形ABCDから△ABDを除いた部分であり、底辺BCが共通で高さが台形の高さと等しいことから、台形の面積×BC/(AD+BC)で求められる。\nBF:FD=${ratioNum}:${ratioDen}より、△FBCの面積は△DBCの面積の${ratioNum}/${ratioNum+ratioDen}倍。\n計算すると△FBCの面積は${formatNum(areaFBC)}。` },
+        { style:'plain', type:'text',
+          prompt: `<span class="mathexpr">∠DBC=<i>x</i>°</span>とするとき、∠BDEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+          final: `<span class="mathexpr"><i>x</i>°</span>`,
+          steps: `AD∥BCであり、EはAD上の点だからBC∥DEとなる。線分BDが2直線BC,DEに交わる錯角だから、∠BDE=∠DBC=<span class="mathexpr"><i>x</i>°</span>。` },
+      ]
     };
   }
   return null;
@@ -1620,9 +3010,6 @@ function generatePattern5(){
     if (!isNice(BD,60) || !isNice(DE,60) || !isNice(AB,60) || !isNice(BC,60)) continue;
     if (BD<0.3 || BD>40 || DE<0.3 || DE>60) continue;
 
-    const AE = t*AC, CE = (t-1)*AC;
-    const acNice = isNice(AC,60) && isNice(AE,60) && isNice(CE,60);
-
     const scene = {
       points: [
         {x:A[0],y:A[1],label:'A',pos:'above'}, {x:B[0],y:B[1],label:'B',pos:'left'},
@@ -1633,79 +3020,23 @@ function generatePattern5(){
       rightAngleMarks: []
     };
 
-    const menu = [];
-    menu.push({ w:3, q:{ style:'proof', type:'proof',
-      prompt: `△ABC∽△ADEであることを証明しなさい。`, final: `(証明は解説を参照)`,
-      steps: `[証明]\n△ABCと△ADEにおいて、\n共通な角だから ∠BAC=∠DAE…①\nBC∥DEであり、平行線の同位角は等しいから\n∠ABC=∠ADE…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ADE` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">AD:AB=${tn}:${td}</span>のとき、線分BDの長さを求めなさい。`, final: formatNum(BD),
-      steps: `AD:AB=${tn}:${td}だから、BD=AD-AB=<span class="mathexpr">AB×(${tn}-${td})/${td}</span>=${formatNum(AB)}×${tn-td}/${td}=${formatNum(BD)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `線分DEの長さを求めなさい。`, final: formatNum(DE),
-      steps: `△ABC∽△ADEより、DE:BC=AD:AB=${tn}:${td}。よってDE=<span class="mathexpr">BC×${tn}/${td}</span>=${formatNum(BC)}×${formatNum(t)}=${formatNum(DE)}。` }});
-    if (acNice){
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">AC=${formatNum(AC)}</span>のとき、線分AEの長さを求めなさい。`, final: formatNum(AE),
-      steps: `△ABC∽△ADEより、AE:AC=AD:AB=${tn}:${td}。よってAE=<span class="mathexpr">AC×${tn}/${td}</span>=${formatNum(AC)}×${formatNum(t)}=${formatNum(AE)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">AC=${formatNum(AC)}</span>のとき、線分CEの長さを求めなさい。`, final: formatNum(CE),
-      steps: `AE=<span class="mathexpr">AC×${tn}/${td}</span>=${formatNum(AE)}であり、CE=AE-AC=${formatNum(AE)}-${formatNum(AC)}=${formatNum(CE)}。` }});
-    }
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠ABC=<i>x</i>°</span>とするとき、∠ADEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr"><i>x</i>°</span>`,
-      steps: `BC∥DEであり、平行線の同位角は等しいから、∠ADE=∠ABC=<span class="mathexpr"><i>x</i>°</span>。` }});
-
     return {
       unitLabel:'三角形+延長線', scene,
       setup: `△ABCがある。辺ABをBの方向に延長した直線上に点Dを、辺ACをCの方向に延長した直線上に点Eを、<span class="mathexpr">BC∥DE</span>となるようにとる。<span class="mathexpr">AB=${formatNum(AB)}, BC=${formatNum(BC)}</span>とする。`,
-      questions: pickFromMenu(menu, 3, true)
-    };
-  }
-  return null;
-}
-
-/* ============ パターン7: 直角三角形+正方形(複合図形) ============ */
-function generatePattern7(){
-  for (let attempt=0; attempt<150; attempt++){
-    const a = randInt(3,12), b = randInt(3,12);
-    const C=[0,0], B=[a,0], A=[0,b], D=[-b,0], E=[-b,b];
-    const F = lineIntersect(A,C,B,E);
-    if (!F) continue;
-    const AF = b*b/(a+b);
-    const CF = b - AF;
-    const BE = dist(B,E);
-    if (!isNice(AF,60) || !isNice(CF,60)) continue;
-
-    const scene = {
-      points: [
-        {x:A[0],y:A[1],label:'A',pos:'above'}, {x:B[0],y:B[1],label:'B',pos:'below'},
-        {x:C[0],y:C[1],label:'C',pos:'below'}, {x:D[0],y:D[1],label:'D',pos:'below'},
-        {x:E[0],y:E[1],label:'E',pos:'above'}, {x:F[0],y:F[1],label:'F',pos:'right'},
-      ],
-      segments: [[0,1,'solid'],[1,2,'solid'],[2,0,'solid'],[0,4,'solid'],[4,3,'solid'],[3,2,'solid'],[1,4,'dashed']],
-      rightAngleMarks: [[2,1,0],[0,4,2]]
-    };
-
-    const menu = [];
-    menu.push({ w:3, q:{ style:'proof', type:'proof',
-      prompt: `△AFEと△DEBが相似になることを証明しなさい。`, final: `(証明は解説を参照)`,
-      steps: `[証明]\n△AFEと△DEBにおいて、\n四角形ACDEは正方形だから ∠EAF=∠BDE=90°…①\nAE∥CB(ともに直線BCに平行)であり、平行線の錯角は等しいから\n∠AEF(=∠AEB)=∠DBE…②\n①、②より、2組の角がそれぞれ等しいので\n△AFE∽△DEB` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">AC=${formatNum(b)}, CB=${formatNum(a)}</span>のとき、線分AFの長さを求めなさい。`, final: formatNum(AF),
-      steps: `△AFE∽△DEBより、AF:DE=AE:DB。AE=DE=AC=${formatNum(b)}、DB=DC+CB=<span class="mathexpr">${formatNum(b)}+${formatNum(a)}</span>=${formatNum(a+b)}だから\nAF=<span class="mathexpr">AE²÷DB</span>=${formatNum(b)}²÷${formatNum(a+b)}=${formatNum(AF)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">AC=${formatNum(b)}, CB=${formatNum(a)}</span>のとき、線分CFの長さを求めなさい。`, final: formatNum(CF),
-      steps: `AF=<span class="mathexpr">AC²÷(AC+CB)</span>=${formatNum(b)}²÷${formatNum(a+b)}=${formatNum(AF)}であり、\nCF=AC-AF=${formatNum(b)}-${formatNum(AF)}=${formatNum(CF)}。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠AEB=<i>x</i>°</span>とするとき、∠DBEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr"><i>x</i>°</span>`,
-      steps: `AE∥CBであり、線分BEが2直線に交わる錯角だから、∠DBE=∠EBC=∠AEB=<span class="mathexpr"><i>x</i>°</span>。` }});
-
-    return {
-      unitLabel:'直角三角形+正方形', scene,
-      setup: `<span class="mathexpr">∠ACB=90°</span>の直角三角形ABCがあり、辺ACを1辺とする正方形ACDEを、頂点Bと反対側につくる。辺ACと線分BEとの交点をFとする。`,
-      questions: pickFromMenu(menu, 3, true)
+      questions: [
+        { style:'proof', type:'proof',
+          prompt: `△ABC∽△ADEであることを証明しなさい。`,
+          final: `(証明は解説を参照)`,
+          steps: `[証明]\n△ABCと△ADEにおいて、\n共通な角だから ∠BAC=∠DAE…①\nBC∥DEであり、平行線の同位角は等しいから\n∠ABC=∠ADE…②\n①、②より、2組の角がそれぞれ等しいので\n△ABC∽△ADE` },
+        { style:'plain', type:'text',
+          prompt: `<span class="mathexpr">AD:AB=${tn}:${td}</span>のとき、線分BDの長さを求めなさい。`,
+          final: formatNum(BD),
+          steps: `AD:AB=${tn}:${td}だから、BD=AD-AB=<span class="mathexpr">AB×(${tn}-${td})/${td}</span>=${formatNum(AB)}×${tn-td}/${td}=${formatNum(BD)}。` },
+        { style:'plain', type:'text',
+          prompt: `線分DEの長さを求めなさい。`,
+          final: formatNum(DE),
+          steps: `△ABC∽△ADEより、DE:BC=AD:AB=${tn}:${td}。よってDE=<span class="mathexpr">BC×${tn}/${td}</span>=${formatNum(BC)}×${formatNum(t)}=${formatNum(DE)}。` },
+      ]
     };
   }
   return null;
@@ -1730,30 +3061,23 @@ function generatePattern6(){
       rightAngleMarks: [[0,2,1],[1,3,4]]
     };
 
-    const areaDQC = legH*legW/2;
-    const menu = [];
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `線分DCの長さを求めなさい。`, final: formatNum(hyp),
-      steps: `四角形ABQDは長方形だから、DQ=AB=${formatNum(legH)}。\n直角三角形DQCにおいて、三平方の定理より\nDC²=DQ²+QC²=<span class="mathexpr">${formatNum(legH)}²+${formatNum(legW)}²</span>=${legH*legH+legW*legW}\nDC=${formatNum(hyp)}(DC>0)。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `台形ABCDの面積を求めなさい。`, final: formatNum(areaTrap),
-      steps: `台形の面積は<span class="mathexpr">(AD+BC)×AB÷2</span>で求められる。BC=AD+QC=<span class="mathexpr">${formatNum(adLen)}+${formatNum(legW)}</span>=${formatNum(adLen+legW)}だから\n面積=(${formatNum(adLen)}+${formatNum(adLen+legW)})×${formatNum(legH)}÷2=${formatNum(areaTrap)}。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `△DQCの面積を求めなさい。`, final: formatNum(areaDQC),
-      steps: `△DQCは∠DQC=90°の直角三角形で、DQ=AB=${formatNum(legH)}、QC=${formatNum(legW)}だから\n面積=<span class="mathexpr">DQ×QC÷2</span>=${formatNum(areaDQC)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠DCB=<i>x</i>°</span>とするとき、∠ADCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-      steps: `AD∥BCであり、DCが2直線に交わる同側内角の和は180°だから、∠ADC=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠DCQ=<i>x</i>°</span>とするとき、∠QDCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr">(90-<i>x</i>)°</span>`,
-      steps: `△DQCは∠DQC=90°の直角三角形だから、∠QDC+∠DCQ=90°。よって∠QDC=<span class="mathexpr">90°-<i>x</i>°</span>。` }});
-
     return {
       unitLabel:'台形+垂線', scene,
       setup: `四角形ABCDは<span class="mathexpr">AD∥BC, ∠ABC=90°</span>の台形である。頂点Dから辺BCに垂線をひき、BCとの交点をQとする。<span class="mathexpr">AB=${formatNum(legH)}, AD=${formatNum(adLen)}, QC=${formatNum(legW)}</span>とする。`,
-      questions: pickFromMenu(menu, 3, false)
+      questions: [
+        { style:'plain', type:'text',
+          prompt: `線分DCの長さを求めなさい。`,
+          final: formatNum(hyp),
+          steps: `四角形ABQDは長方形だから、DQ=AB=${formatNum(legH)}。\n直角三角形DQCにおいて、三平方の定理より\nDC²=DQ²+QC²=<span class="mathexpr">${formatNum(legH)}²+${formatNum(legW)}²</span>=${legH*legH+legW*legW}\nDC=${formatNum(hyp)}(DC>0)。` },
+        { style:'plain', type:'text',
+          prompt: `台形ABCDの面積を求めなさい。`,
+          final: formatNum(areaTrap),
+          steps: `台形の面積は<span class="mathexpr">(AD+BC)×AB÷2</span>で求められる。BC=AD+QC=<span class="mathexpr">${formatNum(adLen)}+${formatNum(legW)}</span>=${formatNum(adLen+legW)}だから\n面積=(${formatNum(adLen)}+${formatNum(adLen+legW)})×${formatNum(legH)}÷2=${formatNum(areaTrap)}。` },
+        { style:'plain', type:'text',
+          prompt: `<span class="mathexpr">∠DCB=<i>x</i>°</span>とするとき、∠ADCの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+          steps: `AD∥BCであり、DCが2直線に交わる同側内角の和は180°だから、∠ADC=<span class="mathexpr">180°-<i>x</i>°</span>。` },
+      ]
     };
   }
   return null;
@@ -1783,26 +3107,23 @@ function generatePattern4(){
       rightAngleMarks: []
     };
 
-    const menu = [];
-    menu.push({ w:3, q:{ style:'proof', type:'proof',
-      prompt: `△BFEと△DFCが相似になることを証明しなさい。`, final: `(証明は解説を参照)`,
-      steps: `[証明]\n△BFEと△DFCにおいて、\n対頂角は等しいから ∠BFE=∠DFC…①\nBE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、平行線の錯角は等しいから\n∠FEB=∠FCD…②\n①、②より、2組の角がそれぞれ等しいので\n△BFE∽△DFC` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、線分BEの長さを求めなさい。`, final: formatNum(BE),
-      steps: `△BFE∽△DFCより、BE:DC=FB:FD。DC=AB=${formatNum(AB)}、FD=FB+BD=<span class="mathexpr">${numRs}+${denRs}</span>=${numRs+denRs}(比の値)だから\nBE=DC×FB/FD=${formatNum(AB)}×${numRs}/${numRs+denRs}=${formatNum(BE)}。` }});
-    menu.push({ w:2, q:{ style:'plain', type:'text',
-      prompt: `<span class="mathexpr">∠BEC=<i>x</i>°</span>とするとき、∠DCEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
-      final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
-      steps: `BE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、線分CEが2直線BE,DCに交わる同側内角の和は180°だから、∠DCE=<span class="mathexpr">180°-<i>x</i>°</span>。` }});
-    menu.push({ w:1, q:{ style:'plain', type:'text',
-      prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、△BFEと△DFCの面積比を、最も簡単な整数の比で表しなさい。`,
-      final: `△BFE:△DFC = <span class="mathexpr">${numRs*numRs}:${(numRs+denRs)*(numRs+denRs)}</span>`,
-      steps: `△BFE∽△DFCで相似比がFB:FD=${numRs}:${numRs+denRs}だから、面積比はその2乗で<span class="mathexpr">${numRs}²:${numRs+denRs}²</span>=${numRs*numRs}:${(numRs+denRs)*(numRs+denRs)}。` }});
-
     return {
       unitLabel:'平行四辺形+延長線', scene,
       setup: `四角形ABCDは平行四辺形である。線分ABの延長上に点Eをとり、線分DB、CEをそれぞれ延長して交わった点をFとする。<span class="mathexpr">AB=${formatNum(AB)}</span>とする。`,
-      questions: pickFromMenu(menu, 3, true)
+      questions: [
+        { style:'proof', type:'proof',
+          prompt: `△BFEと△DFCが相似になることを証明しなさい。`,
+          final: `(証明は解説を参照)`,
+          steps: `[証明]\n△BFEと△DFCにおいて、\n対頂角は等しいから ∠BFE=∠DFC…①\nBE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、平行線の錯角は等しいから\n∠FEB=∠FCD…②\n①、②より、2組の角がそれぞれ等しいので\n△BFE∽△DFC` },
+        { style:'plain', type:'text',
+          prompt: `FB:BD=<span class="mathexpr">${numRs}:${denRs}</span>のとき、線分BEの長さを求めなさい。`,
+          final: formatNum(BE),
+          steps: `△BFE∽△DFCより、BE:DC=FB:FD。DC=AB=${formatNum(AB)}、FD=FB+BD=<span class="mathexpr">${numRs}+${denRs}</span>=${numRs+denRs}(比の値)だから\nBE=DC×FB/FD=${formatNum(AB)}×${numRs}/${numRs+denRs}=${formatNum(BE)}。` },
+        { style:'plain', type:'text',
+          prompt: `<span class="mathexpr">∠BEC=<i>x</i>°</span>とするとき、∠DCEの大きさを<span class="mathexpr"><i>x</i></span>を用いて表しなさい。`,
+          final: `<span class="mathexpr">(180-<i>x</i>)°</span>`,
+          steps: `BE∥DC(BEは辺ABの延長上にあり、AB∥DCだから)であり、線分CEが2直線BE,DCに交わる同側内角の和は180°だから、∠DCE=<span class="mathexpr">180°-<i>x</i>°</span>。` },
+      ]
     };
   }
   return null;
@@ -1816,7 +3137,6 @@ const PATTERNS = [
   { key:'D', title:'平行四辺形+延長線の相似', requiredLines:['extend'], shape:'quad', gen: generatePattern4 },
   { key:'E', title:'三角形+延長線の相似', requiredLines:['extend'], shape:'triangle', gen: generatePattern5 },
   { key:'F', title:'台形+垂線(面積分解)', requiredLines:['altitude'], shape:'quad', gen: generatePattern6 },
-  { key:'G', title:'直角三角形+正方形(複合図形)', requiredLines:[], shape:'combo', gen: generatePattern7 },
 ];
 function getSelectedLines(){
   const lines = [];
@@ -1830,16 +3150,12 @@ function getSelectedShapes(){
   const shapes = [];
   if (document.getElementById('shapeTriangle').checked) shapes.push('triangle');
   if (document.getElementById('shapeQuad').checked) shapes.push('quad');
-  if (document.getElementById('shapeCombo') && document.getElementById('shapeCombo').checked) shapes.push('combo');
   return shapes;
 }
 function matchingPatterns(selectedLines, selectedShapes){
   const selSet = new Set(selectedLines);
   const shapeSet = new Set(selectedShapes);
-  return PATTERNS.filter(p => {
-    if (p.shape==='combo') return shapeSet.has('combo');
-    return p.requiredLines.every(l => selSet.has(l)) && shapeSet.has(p.shape);
-  });
+  return PATTERNS.filter(p => p.requiredLines.every(l => selSet.has(l)) && shapeSet.has(p.shape));
 }
 
 /* ============ 印刷レイアウト ============ */
@@ -1908,6 +3224,9 @@ function buildPrintSheet(){
   return { build: buildPrintSheet };
 })();
 
+/* ============================================================
+   タブ切り替え・共通ボタン制御
+   ============================================================ */
 let currentTab = 'func';
 function switchTab(tab){
   currentTab = tab;
@@ -1932,6 +3251,20 @@ document.getElementById('doPrintBtn').onclick = () => {
   }
   window.print();
 };
+document.getElementById('allRandomBtn').onclick = () => {
+  ['numPara','numLine','numAxisLine','hasInverse','difficulty','shapePref'].forEach(id=>{
+    document.getElementById(id).value = 'random';
+  });
+};
+/* 「ひし形」は放物線+軸に平行な直線(水平線)が必須の構成なので、軸に平行な直線の数が
+   0に固定されたままだと絶対に出題できない。ひし形を選んだ際、まだ0のままなら
+   自動的に1以上に変更して、選んだのに何も出ない、という状況を避ける。 */
+document.getElementById('shapePref').addEventListener('change', function(){
+  if (this.value==='rhombus'){
+    const axisEl = document.getElementById('numAxisLine');
+    if (axisEl.value==='0') axisEl.value='1';
+  }
+});
 
 </script>
 </body>
